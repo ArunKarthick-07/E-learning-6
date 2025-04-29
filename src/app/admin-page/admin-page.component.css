@@ -1,0 +1,154 @@
+/* Ensure the dashboard container takes full width */
+.dashboard-container {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Style the card to allow content to expand */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow: visible; /* Allow content to overflow if needed */
+}
+
+/* Style the table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: auto; /* Enable scrolling if content exceeds container */
+  max-height: 80vh; /* Optional: Limit table height with scrolling */
+}
+
+/* Ensure table header is visible */
+.table-header {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+/* Style table rows */
+.table-row {
+  border-bottom: 1px solid #ddd;
+}
+
+/* Make cells expandable */
+.expandable-table td,
+.expandable-table th {
+  padding: 10px;
+  vertical-align: top; /* Align content to the top */
+  word-wrap: break-word; /* Break long words */
+  max-width: 0; /* Allow cells to expand naturally */
+  overflow: visible; /* Ensure content is not hidden */
+  white-space: normal; /* Allow text to wrap */
+}
+
+/* Ensure lists (e.g., PDFs, YouTube Links, Enrolled Users) are fully visible */
+.expandable-cell ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+  max-height: none; /* Remove any height limit */
+  overflow: visible; /* Ensure list items are not truncated */
+}
+
+.expandable-cell ul li {
+  margin-bottom: 5px;
+  word-break: break-all; /* Break long URLs or text */
+}
+
+/* Optional: Add hover effect for better usability */
+.table-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Ensure the card container doesn’t constrain the table */
+.mb-8 {
+  margin-bottom: 32px;
+}
+
+/* Style error messages */
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.success {
+  color: green;
+  margin-top: 10px;
+}
+
+/* Style placeholder text */
+.placeholder-text {
+  color: #666;
+}
+
+/* Ensure toggle buttons don’t affect table layout */
+.toggle-buttons {
+  margin-bottom: 20px;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.toggle-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+}
+
+button[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel {
+  background-color: #dc3545;
+  margin-left: 10px;
+}
+
+.button.approve {
+  background-color: #28a745;
+}
+
+.button.reject {
+  background-color: #dc3545;
+  margin-left: 5px;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  margin-left: 10px;
+}

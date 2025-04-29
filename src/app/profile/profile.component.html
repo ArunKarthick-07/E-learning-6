@@ -1,0 +1,54 @@
+<div class="profile-container">
+  <h1>Profile</h1>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+
+  <div class="profile-details">
+    <div class="profile-photo">
+      <img [src]="isEditMode ? (editedUser.photo || 'assets/default-profile.jpg') : (user.photo || 'assets/default-profile.jpg')"
+           alt="Profile Photo" class="photo-preview">
+      <input *ngIf="isEditMode" type="file" (change)="onFileChange($event)" accept="image/*">
+    </div>
+
+    <div *ngIf="!isEditMode" class="details-view">
+      <p><strong>Name:</strong> {{ user.name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Mobile:</strong> {{ user.mobile || 'Not provided' }}</p>
+      <p><strong>Age:</strong> {{ user.age || 'Not provided' }}</p>
+      <p><strong>Password:</strong> ********</p>
+      <button (click)="toggleEditMode()" class="edit-button">Edit</button>
+    </div>
+
+    <form *ngIf="isEditMode" #profileForm="ngForm" (ngSubmit)="saveProfile()">
+      <div class="form-group">
+        <label>Name:</label>
+        <input type="text" [(ngModel)]="editedUser.name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="email" [(ngModel)]="editedUser.email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label>Mobile:</label>
+        <input type="text" [(ngModel)]="editedUser.mobile" name="mobile" pattern="[0-9]{10}">
+      </div>
+      <div class="form-group">
+        <label>Age:</label>
+        <input type="number" [(ngModel)]="editedUser.age" name="age" min="1">
+      </div>
+      <div class="form-group">
+        <label>Password:</label>
+        <input type="password" [(ngModel)]="editedUser.password" name="password" minlength="7">
+      </div>
+      <div class="form-group">
+        <label>Re-enter Password:</label>
+        <input type="password" [(ngModel)]="reenterPassword" name="reenterPassword" minlength="7">
+      </div>
+      <div *ngIf="passwordError" class="error-message">{{ passwordError }}</div>
+      <div class="button-group">
+        <button type="submit" [disabled]="!profileForm.valid">Save</button>
+        <button type="button" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

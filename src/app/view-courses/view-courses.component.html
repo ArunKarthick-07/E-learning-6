@@ -1,0 +1,49 @@
+<div class="courses-container" (click)="$event.stopPropagation()">
+  <h2>Your Courses</h2>
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="!isLoading && errorMessage" class="no-courses">
+    {{ errorMessage }}
+  </div>
+  <div *ngIf="!isLoading && courses.length === 0 && !errorMessage" class="no-courses">
+    No courses found.
+  </div>
+  <div *ngIf="!isLoading && courses.length > 0" class="courses-list">
+    <div *ngFor="let course of courses" class="course-card" (click)="$event.stopPropagation()">
+      <div class="course-header" (click)="$event.stopPropagation()">
+        <div *ngIf="course.thumbnail" class="thumbnail">
+          <img [src]="getThumbnailUrl(course.thumbnail)" (error)="handleImageError($event)" alt="{{course.name}} thumbnail" />
+        </div>
+        <div class="course-name-container" (click)="$event.stopPropagation()">
+          <span class="course-name-text" (click)="toggleDetails(course); $event.stopPropagation()">
+            {{course.name}} <span class="toggle-icon">{{course.showDetails ? '▼' : '▶'}}</span>
+          </span>
+          <a [routerLink]="['/edit-course', course._id]" style="color: #28a745; margin-left: 10px;" (click)="onEditClick(course, $event)">Edit</a>
+          <button (click)="deleteCourse(course._id); $event.stopPropagation()" class="delete-button">Delete</button>
+        </div>
+      </div>
+      <div *ngIf="course.showDetails" class="course-details">
+        <p><strong>Description:</strong> {{course.description}}</p>
+        <p><strong>Contents:</strong> {{course.contents}}</p>
+        <p><strong>Price:</strong> Rs.{{course.price.toFixed(2)}}</p>
+        <div *ngIf="course.pdfs.length > 0">
+          <strong>PDFs:</strong>
+          <ul>
+            <li *ngFor="let pdf of course.pdfs">
+              <a [href]="backendBaseUrl + pdf" target="_blank">{{ pdf.split('/').pop() }}</a>
+            </li>
+          </ul>
+        </div>
+        <div *ngIf="course.youtubeLinks.length > 0">
+          <strong>YouTube Links:</strong>
+          <ul>
+            <li *ngFor="let link of course.youtubeLinks">
+              <a [href]="link" target="_blank">{{ link }}</a>
+            </li>
+          </ul>
+        </div>
+        <p><strong>Created At:</strong> {{course.createdAt | date:'medium'}}</p>
+      </div>
+    </div>
+  </div>
+  <button (click)="goBack()">Back to Instructor Page</button>
+</div>

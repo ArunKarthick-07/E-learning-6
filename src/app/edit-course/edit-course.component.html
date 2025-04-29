@@ -1,0 +1,48 @@
+<div class="edit-container" *ngIf="!isLoading">
+  <h2>Edit Course: {{course.name}}</h2>
+  <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)" class="edit-form">
+    <div>
+      <label for="name">Name:</label>
+      <input id="name" name="name" [(ngModel)]="course.name" required>
+    </div>
+    <div>
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" [(ngModel)]="course.description" required></textarea>
+    </div>
+    <div>
+      <label for="contents">Contents:</label>
+      <textarea id="contents" name="contents" [(ngModel)]="course.contents" required></textarea>
+    </div>
+    <div>
+      <label for="price">Price:</label>
+      <input id="price" name="price" type="number" step="0.01" [(ngModel)]="course.price" required>
+    </div>
+    <div>
+      <label>Thumbnail:</label>
+      <input type="file" (change)="onThumbnailChange($event)" accept="image/*">
+      <img *ngIf="course.thumbnail" [src]="getThumbnailUrl(course.thumbnail)" (error)="handleImageError($event)" alt="Thumbnail" width="100">
+    </div>
+    <div>
+      <label>PDFs:</label>
+      <input type="file" multiple (change)="onFileChange($event)" accept=".pdf">
+      <button type="button" (click)="uploadFiles()" [disabled]="isLoading">Upload Files</button>
+      <ul>
+        <li *ngFor="let pdf of course.pdfs; let i = index">
+          {{pdf.split('/').pop()}}
+          <button type="button" (click)="removePdf(i); $event.stopPropagation()">Remove</button>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <label>YouTube Links:</label>
+      <div *ngFor="let link of course.youtubeLinks; let i = index">
+        <input [(ngModel)]="course.youtubeLinks[i]" name="youtubeLink{{i}}" placeholder="Enter YouTube URL" required>
+        <button type="button" (click)="removeYoutubeLink(i)" [disabled]="course.youtubeLinks.length <= 1">Remove</button>
+      </div>
+      <button type="button" (click)="addYoutubeLink()">Add Link</button>
+    </div>
+    <button type="submit" [disabled]="!courseForm.valid || isLoading">Save Changes</button>
+    <button type="button" (click)="goBack()">Cancel</button>
+  </form>
+</div>
+<div *ngIf="isLoading" class="loading">Loading...</div>

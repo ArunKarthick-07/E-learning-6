@@ -1,0 +1,27 @@
+<div class="marklist-container">
+    <h1>Student Marklist</h1>
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  
+    <table *ngIf="students.length > 0 && assessments.length > 0; else noData">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th *ngFor="let assessment of assessments">{{ assessment.title }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of students">
+          <td>{{ student.username }}</td>
+          <td *ngFor="let assessment of assessments">
+            {{ getStudentScore(student._id, assessment._id) || '-' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <ng-template #noData>
+      <p>No students or assessments found for this course.</p>
+    </ng-template>
+  
+    <button (click)="goBack()">Back to Instructor Page</button>
+  </div>

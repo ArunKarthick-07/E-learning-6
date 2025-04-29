@@ -1,0 +1,40 @@
+<div class="view-assessments-container">
+    <h2>View Assessments</h2>
+  
+    <div *ngIf="loading" class="loading-message">
+      Loading assessments...
+    </div>
+  
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="!loading && !error">
+      <div *ngIf="assessments.length === 0" class="no-assessments">
+        No assessments found. Create an assessment to get started!
+      </div>
+  
+      <table *ngIf="assessments.length > 0" class="assessments-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Course</th>
+            <th>Questions</th>
+            <th>Time Limit (min)</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let assessment of assessments">
+            <td>{{ assessment.title }}</td>
+            <td>{{ getCourseName(assessment.courseId) }}</td>
+            <td>{{ assessment.questions.length }}</td>
+            <td>{{ assessment.timeLimit }}</td>
+            <td>{{ assessment.createdAt | date:'medium' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <button (click)="goBack()" class="back-button">Back to Instructor Page</button>
+  </div>

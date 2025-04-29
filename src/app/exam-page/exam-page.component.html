@@ -1,0 +1,47 @@
+<div class="exam-container">
+  <h1>{{ assessment?.title || 'Assessment' }}</h1>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div *ngIf="assessment && !submitted">
+    <p>Time Remaining: {{ formatTime(timeRemaining) }}</p>
+    <div class="progress">Question {{ currentQuestionIndex + 1 }} of {{ assessment.questions.length }}</div>
+    <div *ngFor="let question of assessment.questions; let i = index" class="question" [ngClass]="{'active': i === currentQuestionIndex}">
+      <h3>Question {{ i + 1 }}: {{ question.text }} ({{ question.marks }} marks)</h3>
+      <div class="options">
+        <div *ngFor="let option of question.options; let j = index" class="option">
+          <input
+            type="radio"
+            [name]="'question-' + i"
+            [value]="j + 1"
+            [(ngModel)]="answers[i]"
+            (change)="selectAnswer(i, j)"
+          >
+          {{ option }}
+        </div>
+      </div>
+    </div>
+    <button (click)="confirmEndTest()" [disabled]="submitted" class="end-test">End Test</button>
+  </div>
+
+  <div *ngIf="submitted && score !== null">
+    <h2>Test Finished!</h2>
+    <p *ngIf="score > 0; else noAnswers">Your Score: {{ score }} / {{ totalMarks }}</p>
+    <ng-template #noAnswers>
+      <p>No questions were answered. Your score is 0 / {{ totalMarks }}.</p>
+    </ng-template>
+    <p *ngIf="submissionMessage" class="success">{{ submissionMessage }}</p>
+  </div>
+
+  <!-- Warning Modal -->
+  <div *ngIf="showWarning" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Warning</h2>
+      <p>You are about to leave the exam. Any progress will be lost unless you end the test.</p>
+      <p *ngIf="unansweredQuestions.length > 0" class="error">Unanswered questions: {{ unansweredQuestions.join(', ') }}</p>
+      <div class="modal-buttons">
+        <button (click)="cancelNavigation()">Cancel</button>
+        <button (click)="confirmNavigation()">Leave Exam</button>
+      </div>
+    </div>
+  </div>
+</div>

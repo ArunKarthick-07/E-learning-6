@@ -1,0 +1,9 @@
+<div class="home-container animate-fade-in" id="home-container">
+  <h2 class="animate-bounce">E-Learning</h2>
+  <div class="swipe-hint">Swipe Up to Begin!</div>
+  <div class="button-group" [ngClass]="{'show': showButtons}">
+    <button (click)="navigateToUserLogin()" class="login-button user animate-slide-in" style="--delay: 0s;">User Login</button>
+    <button (click)="navigateToAdminLogin()" class="login-button admin animate-slide-in" style="--delay: 0.2s;">Admin Login</button>
+    <button (click)="navigateToInstructorLogin()" class="login-button instructor animate-slide-in" style="--delay: 0.4s;">Instructor Login</button>
+  </div>
+</div>
