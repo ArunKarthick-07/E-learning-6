@@ -16,7 +16,12 @@ interface Course {
   thumbnail?: string;
   price: number;
   createdAt: string;
-  showDetails?: boolean;
+}
+
+interface Student {
+  _id: string;
+  name: string;
+  email: string;
 }
 
 @Component({
@@ -28,10 +33,15 @@ interface Course {
 })
 export class ViewCoursesComponent implements OnInit, OnDestroy {
   courses: Course[] = [];
+  enrolledStudents: { [courseId: string]: Student[] } = {};
+  studentsLoaded: { [courseId: string]: boolean } = {};
   instructorId: string | null = null;
   isLoading = false;
   errorMessage: string = '';
   backendBaseUrl = 'http://localhost:3000';
+  selectedFile: File | null = null;
+  selectedCourseId: string | null = null;
+  focusedCourseId: string | null = null;
 
   constructor(
     private http: HttpClient,
@@ -73,24 +83,55 @@ export class ViewCoursesComponent implements OnInit, OnDestroy {
         this.courses = response.courses.map((course: Course) => ({
           ...course,
           pdfs: Array.isArray(course.pdfs) ? course.pdfs : [],
-          youtubeLinks: Array.isArray(course.youtubeLinks) ? course.youtubeLinks : [],
-          showDetails: false
+          youtubeLinks: Array.isArray(course.youtubeLinks) ? course.youtubeLinks : []
         }));
+        for (const course of this.courses) {
+          await this.fetchEnrolledStudents(course._id);
+        }
       } else {
         this.courses = [];
+        this.errorMessage = 'No courses found for this instructor.';
       }
     } catch (error: any) {
       console.error('Error fetching courses:', error);
-      this.errorMessage = 'Failed to load courses';
+      this.errorMessage = 'Failed to load courses: ' + (error.statusText || error.message || 'Unknown error');
       this.courses = [];
     } finally {
       this.isLoading = false;
     }
   }
 
+  async fetchEnrolledStudents(courseId: string): Promise<void> {
+    try {
+      console.log(`Fetching enrolled students for course ${courseId}`);
+      const response: any = await this.http
+        .get(`${this.backendBaseUrl}/api/courses/${courseId}/students`)
+        .toPromise();
+      console.log(`Enrolled students response for course ${courseId}:`, response);
+      if (response && response.students && Array.isArray(response.students)) {
+        this.enrolledStudents[courseId] = response.students.map((student: any) => ({
+          _id: student._id,
+          name: student.username || 'Unknown User', // Map 'username' to 'name'
+          email: student.email || 'No email provided'
+        }));
+      } else {
+        console.warn(`No students found for course ${courseId}`);
+        this.enrolledStudents[courseId] = [];
+      }
+    } catch (error: any) {
+      console.error(`Error fetching enrolled students for course ${courseId}:`, error);
+      this.errorMessage = `Failed to load enrolled students for course ${courseId}: ` + 
+        (error.statusText || error.message || 'Unknown error');
+      this.enrolledStudents[courseId] = [];
+    } finally {
+      this.studentsLoaded[courseId] = true;
+    }
+  }
+
   getThumbnailUrl(thumbnailPath?: string): SafeUrl | string {
     if (!thumbnailPath) return '';
-    return this.sanitizer.bypassSecurityTrustUrl(`${this.backendBaseUrl}${thumbnailPath}`);
+    const cacheBust = new Date().getTime();
+    return this.sanitizer.bypassSecurityTrustUrl(`${this.backendBaseUrl}${thumbnailPath}?t=${cacheBust}`);
   }
 
   handleImageError(event: Event): void {
@@ -100,8 +141,62 @@ export class ViewCoursesComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleDetails(course: Course): void {
-    course.showDetails = !course.showDetails;
+  toggleFocus(courseId: string): void {
+    if (this.focusedCourseId === courseId) {
+      this.focusedCourseId = null;
+    } else {
+      this.focusedCourseId = courseId;
+    }
+  }
+
+  resetFocus(): void {
+    this.focusedCourseId = null;
+  }
+
+  onThumbnailChange(courseId: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      this.selectedCourseId = courseId;
+    }
+  }
+
+  async updateThumbnail(): Promise<void> {
+    if (!this.selectedFile || !this.selectedCourseId || !this.instructorId) {
+      this.errorMessage = 'Please select a file and ensure you are logged in.';
+      return;
+    }
+
+    this.isLoading = true;
+    const formData = new FormData();
+    formData.append('thumbnail', this.selectedFile);
+
+    console.log(`Sending thumbnail update for course: ${this.selectedCourseId}`);
+
+    try {
+      const response: any = await this.http
+        .put(`${this.backendBaseUrl}/api/courses/${this.selectedCourseId}/thumbnail`, formData, {
+          headers: { 'instructor-id': this.instructorId }
+        })
+        .toPromise();
+
+      console.log('Thumbnail update response:', response);
+
+      if (response && response.message === 'Thumbnail updated successfully') {
+        console.log('Thumbnail updated, refreshing course data');
+        await this.fetchCourses();
+        alert('Thumbnail updated successfully!');
+        this.selectedFile = null;
+        this.selectedCourseId = null;
+      } else {
+        throw new Error('Unexpected response from server');
+      }
+    } catch (error: any) {
+      console.error('Error updating thumbnail:', error);
+      this.errorMessage = error.error?.message || 'Failed to update thumbnail';
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   onEditClick(course: Course, event: Event): void {
@@ -126,7 +221,7 @@ export class ViewCoursesComponent implements OnInit, OnDestroy {
       }).subscribe({
         next: () => {
           console.log(`Course ${courseId} deleted`);
-          this.fetchCourses(); // Refresh the course list
+          this.fetchCourses();
           alert('Course deleted successfully!');
         },
         error: (err) => {
@@ -148,6 +243,16 @@ export class ViewCoursesComponent implements OnInit, OnDestroy {
       console.log('Navigating to /instructor-page');
       this.router.navigate(['/instructor-page']).catch(err => console.error('Navigation to instructor-page failed:', err));
     }
+  }
+
+  goToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
+
+  logout(): void {
+    localStorage.removeItem('instructorId');
+    localStorage.removeItem('isLoggedIn');
+    this.router.navigate(['/']);
   }
 
   globalClickHandler(event: Event): void {

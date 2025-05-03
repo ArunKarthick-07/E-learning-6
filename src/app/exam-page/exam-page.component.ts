@@ -37,7 +37,7 @@ export class ExamPageComponent implements OnInit, OnDestroy {
   currentQuestionIndex: number = 0;
   showWarning: boolean = false;
   unansweredQuestions: number[] = [];
-  isBackNavigation: boolean = false; // Track if navigation is from back button
+  isBackNavigation: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -47,7 +47,6 @@ export class ExamPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAssessment();
-    // Push initial state to history to allow back button handling
     history.pushState(null, '', window.location.href);
   }
 
@@ -69,7 +68,7 @@ export class ExamPageComponent implements OnInit, OnDestroy {
   onPopState(event: PopStateEvent): void {
     if (!this.submitted) {
       event.preventDefault();
-      this.isBackNavigation = true; // Mark as back navigation
+      this.isBackNavigation = true;
       this.checkUnansweredQuestions();
       if (this.unansweredQuestions.length > 0) {
         this.errorMessage = `You have not answered the following questions: ${this.unansweredQuestions.join(', ')}. Do you still want to leave?`;
@@ -77,35 +76,54 @@ export class ExamPageComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Are you sure you want to leave the exam?';
       }
       this.showWarning = true;
-      history.pushState(null, '', window.location.href); // Push state again to prevent navigation
+      history.pushState(null, '', window.location.href);
     }
   }
 
   loadAssessment(): void {
     const assessmentId = this.route.snapshot.queryParams['assessmentId'];
     const courseId = this.route.snapshot.queryParams['courseId'];
+    const userId = localStorage.getItem('userId');
 
-    if (!assessmentId || !courseId) {
-      this.errorMessage = 'Missing assessment or course ID.';
+    if (!assessmentId || !courseId || !userId) {
+      this.errorMessage = 'Missing assessment, course, or user ID.';
       return;
     }
 
-    this.http.get<{ assessments: Assessment[] }>(`http://localhost:3000/api/assessments/course/${courseId}`).subscribe({
-      next: (data) => {
-        this.assessment = data.assessments.find(a => a._id === assessmentId) || null;
-        if (this.assessment) {
-          console.log('Assessment loaded:', this.assessment);
-          this.timeRemaining = this.assessment.timeLimit * 60;
-          this.startTimer();
-          this.answers = new Array(this.assessment.questions.length).fill(undefined);
-          this.totalMarks = this.assessment.questions.reduce((sum, q) => sum + q.marks, 0);
-        } else {
-          this.errorMessage = 'Assessment not found.';
-        }
+    // Check for existing submission to prevent retaking the assessment
+    this.http.get(`http://localhost:3000/api/assessment_mark/answers/${userId}/${assessmentId}`).subscribe({
+      next: () => {
+        this.submitted = true;
+        this.errorMessage = 'You have already submitted this assessment. Redirecting to user page...';
+        setTimeout(() => {
+          this.router.navigate(['/user-page'], { queryParams: { id: userId } });
+        }, 3000);
       },
       error: (err) => {
-        console.error('Error fetching assessment:', err);
-        this.errorMessage = 'Failed to load assessment.';
+        if (err.status === 404) {
+          // No submission found, proceed to load the assessment
+          this.http.get<{ assessments: Assessment[] }>(`http://localhost:3000/api/assessments/course/${courseId}`).subscribe({
+            next: (data) => {
+              this.assessment = data.assessments.find(a => a._id === assessmentId) || null;
+              if (this.assessment) {
+                console.log('Assessment loaded:', this.assessment);
+                this.timeRemaining = this.assessment.timeLimit * 60;
+                this.startTimer();
+                this.answers = new Array(this.assessment.questions.length).fill(undefined);
+                this.totalMarks = this.assessment.questions.reduce((sum, q) => sum + q.marks, 0);
+              } else {
+                this.errorMessage = 'Assessment not found.';
+              }
+            },
+            error: (err) => {
+              console.error('Error fetching assessment:', err);
+              this.errorMessage = 'Failed to load assessment: ' + (err.statusText || err.message || 'Unknown error');
+            }
+          });
+        } else {
+          console.error('Error checking submission status:', err);
+          this.errorMessage = 'Error checking submission status: ' + (err.statusText || err.message || 'Unknown error');
+        }
       }
     });
   }
@@ -144,7 +162,7 @@ export class ExamPageComponent implements OnInit, OnDestroy {
   }
 
   confirmEndTest(): void {
-    this.isBackNavigation = false; // Not a back navigation
+    this.isBackNavigation = false;
     this.checkUnansweredQuestions();
     if (this.unansweredQuestions.length > 0) {
       this.errorMessage = `You have not answered the following questions: ${this.unansweredQuestions.join(', ')}. Do you still want to end the test?`;
@@ -168,34 +186,42 @@ export class ExamPageComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Submit marks to backend
-    const studentId = localStorage.getItem('userId');
-    const studentName = localStorage.getItem('userName') || 'Anonymous';
-    const courseId = this.route.snapshot.queryParams['courseId'];
+    // Prepare answers for submission
+    const formattedAnswers = this.answers.map((answer, index) => ({
+      questionIndex: index,
+      selectedAnswer: answer || 0 // Use 0 for unanswered questions
+    }));
 
-    if (!studentId || !courseId) {
-      this.errorMessage = 'Missing student ID or course ID for submission.';
+    // Submit marks and answers to backend
+    const userId = localStorage.getItem('userId');
+    const assessmentId = this.assessment._id;
+
+    if (!userId || !assessmentId) {
+      this.errorMessage = 'Missing user ID or assessment ID for submission.';
       return;
     }
 
-    const markData = {
-      studentId,
-      studentName,
-      courseId,
+    const submissionData = {
+      userId,
+      assessmentId,
+      answers: formattedAnswers,
       marks: this.score
     };
 
-    this.http.post('http://localhost:3000/api/assessment_mark', markData).subscribe({
+    console.log('Submitting assessment:', submissionData);
+
+    this.http.post('http://localhost:3000/api/assessment_mark/submit', submissionData).subscribe({
       next: (response) => {
-        console.log('Mark submitted:', response);
+        console.log('Assessment submitted:', response);
         this.submissionMessage = 'Test ended successfully! Redirecting to user page...';
         setTimeout(() => {
-          this.router.navigate(['/user-page'], { queryParams: { id: studentId } });
+          this.router.navigate(['/user-page'], { queryParams: { id: userId } });
         }, 3000);
       },
       error: (err) => {
-        console.error('Error submitting mark:', err);
-        this.errorMessage = 'Failed to submit marks.';
+        console.error('Error submitting assessment:', err);
+        this.errorMessage = 'Failed to submit assessment: ' + (err.statusText || err.message || 'Unknown error');
+        this.submitted = false; // Allow retry on failure
       }
     });
   }
@@ -209,9 +235,9 @@ export class ExamPageComponent implements OnInit, OnDestroy {
   confirmNavigation(): void {
     this.showWarning = false;
     if (this.isBackNavigation) {
-      this.submitExam(); // Submit exam before redirecting
+      this.submitExam();
     } else {
-      this.submitExam(); // Same behavior for "End Test"
+      this.submitExam();
     }
   }
 }

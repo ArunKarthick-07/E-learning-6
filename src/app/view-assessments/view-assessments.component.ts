@@ -96,6 +96,16 @@ export class ViewAssessmentsComponent implements OnInit {
     return course ? course.name : 'Unknown Course';
   }
 
+  viewAssessment(assessmentId: string): void {
+    this.router.navigate([`/assessment-detail/${assessmentId}`])
+      .then(success => {
+        console.log('Navigation to /assessment-detail successful:', success);
+      })
+      .catch(err => {
+        console.error('Navigation to /assessment-detail failed:', err);
+      });
+  }
+
   goBack(): void {
     this.router.navigate(['/instructor-page']).then(success => {
       console.log('Navigation to /instructor-page successful:', success);

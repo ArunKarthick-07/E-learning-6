@@ -1,64 +1,235 @@
+/* Global box-sizing to prevent padding/border issues */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reset default margins and paddings */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Page Container with Background Image */
+.page-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('/assets/1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Add a semi-transparent overlay to the entire page for readability */
+.page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 0;
+}
+
+/* Ensure the view-assessments container is above the overlay */
+.page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Main container with upgraded styling */
 .view-assessments-container {
-    max-width: 800px;
-    margin: 40px auto;
+  max-width: 1000px; /* Slightly increased from 900px for consistency */
+  width: 90%;
+  margin: 20px 0; /* Adjusted for centering */
+  padding: 40px; /* Increased from 30px */
+  background: linear-gradient(135deg, rgba(230, 240, 250, 0.95), rgba(240, 247, 255, 0.95));
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 50, 100, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect for container */
+.view-assessments-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 50, 100, 0.2);
+}
+
+/* Heading with modern styling */
+h2 {
+  color: #1e3a8a; /* Updated to match User Login */
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 35px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Loading message with animation */
+.loading-message {
+  color: #0ea5e9; /* Slightly adjusted for consistency */
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  animation: pulse 1.5s infinite;
+}
+
+/* Error message with subtle background */
+.error-message {
+  color: #e53e3e; /* Updated to match User Login */
+  text-align: center;
+  font-size: 16px;
+  padding: 15px;
+  background: rgba(229, 62, 62, 0.1); /* Adjusted for consistency */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(229, 62, 62, 0.1);
+}
+
+/* No assessments message with modern styling */
+.no-assessments {
+  color: #2d3748; /* Updated to match User Login */
+  text-align: center;
+  font-size: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Wrapper for assessments table */
+.assessments-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Assessments table with modern design */
+.assessments-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Table headers and cells */
+.assessments-table th,
+.assessments-table td {
+  padding: 15px;
+  text-align: left;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+/* Table headers */
+.assessments-table th {
+  background: linear-gradient(135deg, #3182ce, #63b3ed); /* Updated to match User Login */
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+/* Table rows */
+.assessments-table tr {
+  background: #f8fafc;
+}
+
+/* Hover effect for table rows */
+.assessments-table tr:hover {
+  background: #e2e8f0;
+  transform: scale(1.01);
+  transition: transform 0.2s ease;
+}
+
+/* Clickable row styling */
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #d1e7ff;
+}
+
+/* Table cells */
+.assessments-table td {
+  border-bottom: 1px solid #e5e7eb;
+  color: #2d3748; /* Updated to match User Login */
+  font-size: 15px;
+}
+
+/* Back button with modern styling */
+.back-button {
+  padding: 14px 25px; /* Increased from 12px 25px */
+  border: none;
+  border-radius: 6px; /* Adjusted from 8px for consistency */
+  cursor: pointer;
+  background: linear-gradient(45deg, #6b7280, #a0aec0); /* Updated to match User Login */
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+  margin: 20px auto 0;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect for back button */
+.back-button:hover:not(:disabled) {
+  background: linear-gradient(45deg, #4b5563, #7f8c9d);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(107, 114, 128, 0.4);
+}
+
+/* Pulse animation for loading message */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .page-container {
     padding: 20px;
   }
-  
+
+  .view-assessments-container {
+    max-width: 100%;
+    padding: 25px; /* Adjusted for smaller screens */
+  }
+
   h2 {
-    color: #333;
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    text-align: center;
+    font-size: 26px; /* Adjusted from 32px */
   }
-  
-  .loading-message {
-    color: #17a2b8;
-    text-align: center;
-  }
-  
-  .error-message {
-    color: #dc3545;
-    text-align: center;
-  }
-  
-  .no-assessments {
-    color: #666;
-    text-align: center;
-    font-size: 16px;
-  }
-  
-  .assessments-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
+
   .assessments-table th,
   .assessments-table td {
     padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
+    font-size: 14px;
   }
-  
-  .assessments-table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
+
+  .loading-message,
+  .error-message,
+  .no-assessments {
+    font-size: 14px;
   }
-  
-  .assessments-table tr:hover {
-    background-color: #f5f5f5;
-  }
-  
+
   .back-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #6c757d;
-    color: white;
+    padding: 12px 20px;
+    font-size: 15px;
   }
-  
-  .back-button:hover {
-    background-color: #5a6268;
-  }
+}

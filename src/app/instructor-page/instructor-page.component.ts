@@ -15,6 +15,13 @@ interface Course {
   youtubeLinks?: string[];
 }
 
+interface Notification {
+  _id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 @Component({
   selector: 'app-instructor-page',
   standalone: true,
@@ -27,8 +34,10 @@ export class InstructorPageComponent implements OnInit {
   courseCount: number = 0;
   courses: Course[] = [];
   selectedCourse: Course | null = null;
+  notifications: Notification[] = [];
   isLoading: boolean = false;
   error: string | null = null;
+  showNotifications: boolean = false; // Hidden by default
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -39,6 +48,7 @@ export class InstructorPageComponent implements OnInit {
       return;
     }
     this.fetchCourses();
+    this.fetchNotifications();
   }
 
   async fetchCourses(): Promise<void> {
@@ -50,6 +60,7 @@ export class InstructorPageComponent implements OnInit {
         this.courseCount = 0;
         this.courses = [];
         this.error = 'Instructor ID not found in localStorage';
+        this.isLoading = false;
         return;
       }
       const response: any = await this.http
@@ -62,23 +73,65 @@ export class InstructorPageComponent implements OnInit {
         })) || [];
         this.courseCount = this.courses.length;
       } else {
+        // Instead of setting an error, just set courses to empty array
         this.courses = [];
         this.courseCount = 0;
-        this.error = 'No courses found';
       }
     } catch (error: any) {
       console.error('Error fetching courses:', error);
       this.courses = [];
       this.courseCount = 0;
-      this.error = error.message || 'Failed to fetch courses';
+      this.error = error.message || 'Failed to fetch courses. Please try again later.';
     } finally {
       this.isLoading = false;
     }
   }
 
+  async fetchNotifications(): Promise<void> {
+    try {
+      const instructorId = localStorage.getItem('instructorId');
+      if (!instructorId) {
+        console.error('Instructor ID not found in localStorage');
+        return;
+      }
+      const response: any = await this.http
+        .get(`http://localhost:3000/api/notifications/instructor/${instructorId}`)
+        .toPromise();
+      if (response && response.notifications) {
+        this.notifications = response.notifications;
+      } else {
+        this.notifications = [];
+      }
+    } catch (error: any) {
+      console.error('Error fetching notifications:', error);
+      this.notifications = [];
+    }
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    try {
+      await this.http
+        .put(`http://localhost:3000/api/notifications/${notificationId}/read`, {})
+        .toPromise();
+      this.notifications = this.notifications.map(notif =>
+        notif._id === notificationId ? { ...notif, read: true } : notif
+      );
+    } catch (error: any) {
+      console.error('Error marking notification as read:', error);
+    }
+  }
+
+  toggleNotifications(): void {
+    this.showNotifications = !this.showNotifications;
+  }
+
   selectCourse(course: Course): void {
     this.selectedCourse = { ...course };
     console.log('Selected course:', this.selectedCourse);
+  }
+
+  closeDetails(): void {
+    this.selectedCourse = null;
   }
 
   viewMarklist(): void {

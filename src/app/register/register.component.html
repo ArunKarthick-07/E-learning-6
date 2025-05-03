@@ -1,96 +1,98 @@
-<div class="register-container">
-  <h2>Register</h2>
-  <form (ngSubmit)="onSubmit(f)" #f="ngForm" novalidate>
-    <!-- Name Field -->
-    <div>
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" [(ngModel)]="formdata.name" #name="ngModel" required />
-      <span class="text-danger" *ngIf="submit && name.errors?.['required']">
-        Name is required.
-      </span>
-    </div>
-
-    <!-- Age Field -->
-    <div>
-      <label for="age">Age</label>
-      <input type="number" id="age" name="age" [(ngModel)]="formdata.age" #age="ngModel" required min="18" />
-      <span class="text-danger" *ngIf="submit && age.errors?.['required']">
-        Age is required.
-      </span>
-      <span class="text-danger" *ngIf="submit && age.errors?.['min']">
-        Age must be at least 18.
-      </span>
-    </div>
-
-    <!-- Email Field -->
-    <div>
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" [(ngModel)]="formdata.email" #mail="ngModel" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" />
-      <span class="text-danger" *ngIf="submit && mail.errors?.['required']">
-        Email is required.
-      </span>
-      <span class="text-danger" *ngIf="submit && mail.errors?.['pattern']">
-        Please enter a valid Gmail address.
-      </span>
-    </div>
-
-    <!-- Password Field -->
-    <div class="password-container">
-      <label for="password">Password</label>
-      <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="formdata.password" #pass="ngModel" required (input)="updatePasswordCriteria()" (focus)="showRequirements = true" (blur)="showRequirements = false" />
-      <span class="password-toggle material-icons" (click)="togglePasswordVisibility()" [ngClass]="showPassword ? 'visibility_off' : 'visibility'"></span>
-      <span class="text-danger" *ngIf="submit && pass.errors?.['required']">
-        Password is required.
-      </span>
-      <div class="password-requirements" *ngIf="showRequirements">
-        <ul>
-          <li [ngClass]="passwordCriteria.minLength ? 'valid' : 'invalid'">At least 7 characters</li>
-          <li [ngClass]="passwordCriteria.uppercase ? 'valid' : 'invalid'">At least one uppercase letter</li>
-          <li [ngClass]="passwordCriteria.number ? 'valid' : 'invalid'">At least one number</li>
-        </ul>
+<div class="page-container">
+  <div class="register-container">
+    <h2>Register</h2>
+    <form (ngSubmit)="onSubmit(f)" #f="ngForm" novalidate>
+      <!-- Name Field -->
+      <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" [(ngModel)]="formdata.name" #name="ngModel" required />
+        <span class="text-danger" *ngIf="submit && name.errors?.['required']">
+          Name is required.
+        </span>
       </div>
-    </div>
 
-    <!-- Re-enter Password Field -->
-    <div class="password-container">
-      <label for="reenterPassword">Re-enter Password</label>
-      <input [type]="showReenterPassword ? 'text' : 'password'" id="reenterPassword" name="reenterPassword" [(ngModel)]="formdata.reenterPassword" #repass="ngModel" required />
-      <span class="password-toggle material-icons" (click)="toggleReenterPasswordVisibility()" [ngClass]="showReenterPassword ? 'visibility_off' : 'visibility'"></span>
-      <span class="text-danger" *ngIf="submit && !formdata.password && repass.errors?.['required']">
-        Re-enter password is required.
-      </span>
-    </div>
+      <!-- Age Field -->
+      <div>
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" [(ngModel)]="formdata.age" #age="ngModel" required min="18" />
+        <span class="text-danger" *ngIf="submit && age.errors?.['required']">
+          Age is required.
+        </span>
+        <span class="text-danger" *ngIf="submit && age.errors?.['min']">
+          Age must be at least 18.
+        </span>
+      </div>
 
-    <!-- Password Validation Error -->
-    <div *ngIf="passwordError" class="text-danger">
-      {{ passwordError }}
-    </div>
+      <!-- Email Field -->
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="formdata.email" #mail="ngModel" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" />
+        <span class="text-danger" *ngIf="submit && mail.errors?.['required']">
+          Email is required.
+        </span>
+        <span class="text-danger" *ngIf="submit && mail.errors?.['pattern']">
+          Please enter a valid Gmail address.
+        </span>
+      </div>
 
-    <!-- Mobile Field -->
-    <div>
-      <label for="mobile">Mobile Number</label>
-      <input type="tel" id="mobile" name="mobile" pattern="^[0-9]{10}$" [(ngModel)]="formdata.mobile" #ph="ngModel" required />
-      <span class="text-danger" *ngIf="submit && ph.errors?.['required']">
-        Mobile number is required.
-      </span>
-      <span class="text-danger" *ngIf="submit && ph.errors?.['pattern']">
-        Mobile number should be 10 digits.
-      </span>
-    </div>
+      <!-- Password Field -->
+      <div class="password-container">
+        <label for="password">Password</label>
+        <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="formdata.password" #pass="ngModel" required (input)="updatePasswordCriteria()" (focus)="showRequirements = true" (blur)="showRequirements = false" />
+        <span class="password-toggle material-icons" (click)="togglePasswordVisibility()" [ngClass]="showPassword ? 'visibility_off' : 'visibility'"></span>
+        <span class="text-danger" *ngIf="submit && pass.errors?.['required']">
+          Password is required.
+        </span>
+        <div class="password-requirements" *ngIf="showRequirements">
+          <ul>
+            <li [ngClass]="passwordCriteria.minLength ? 'valid' : 'invalid'">At least 7 characters</li>
+            <li [ngClass]="passwordCriteria.uppercase ? 'valid' : 'invalid'">At least one uppercase letter</li>
+            <li [ngClass]="passwordCriteria.number ? 'valid' : 'invalid'">At least one number</li>
+          </ul>
+        </div>
+      </div>
 
-    <!-- Profile Photo Field -->
-    <div>
-      <label for="photo">Profile Photo</label>
-      <input type="file" id="photo" name="photo" (change)="onFileChange($event)" accept="image/jpeg,image/png,image/jpg" />
-      <span class="text-danger" *ngIf="submit && !photoFile">
-        Profile photo is optional but recommended.
-      </span>
-    </div>
+      <!-- Re-enter Password Field -->
+      <div class="password-container">
+        <label for="reenterPassword">Re-enter Password</label>
+        <input [type]="showReenterPassword ? 'text' : 'password'" id="reenterPassword" name="reenterPassword" [(ngModel)]="formdata.reenterPassword" #repass="ngModel" required />
+        <span class="password-toggle material-icons" (click)="toggleReenterPasswordVisibility()" [ngClass]="showReenterPassword ? 'visibility_off' : 'visibility'"></span>
+        <span class="text-danger" *ngIf="submit && !formdata.password && repass.errors?.['required']">
+          Re-enter password is required.
+        </span>
+      </div>
 
-    <!-- Submit Button -->
-    <button type="submit" [disabled]="!f.valid" (click)="submit=true">Register</button>
-  </form>
-  <p class="login-link">
-    Already have an account? <a (click)="navigateToLogin()">Login here</a>
-  </p>
+      <!-- Password Validation Error -->
+      <div *ngIf="passwordError" class="text-danger">
+        {{ passwordError }}
+      </div>
+
+      <!-- Mobile Field -->
+      <div>
+        <label for="mobile">Mobile Number</label>
+        <input type="tel" id="mobile" name="mobile" pattern="^[0-9]{10}$" [(ngModel)]="formdata.mobile" #ph="ngModel" required />
+        <span class="text-danger" *ngIf="submit && ph.errors?.['required']">
+          Mobile number is required.
+        </span>
+        <span class="text-danger" *ngIf="submit && ph.errors?.['pattern']">
+          Mobile number should be 10 digits.
+        </span>
+      </div>
+
+      <!-- Profile Photo Field -->
+      <div>
+        <label for="photo">Profile Photo</label>
+        <input type="file" id="photo" name="photo" (change)="onFileChange($event)" accept="image/jpeg,image/png,image/jpg" />
+        <span class="text-danger" *ngIf="submit && !photoFile">
+          Profile photo is optional but recommended.
+        </span>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" [disabled]="!f.valid" (click)="submit=true">Register</button>
+    </form>
+    <p class="login-link">
+      Already have an account? <a (click)="navigateToLogin()">Login here</a>
+    </p>
+  </div>
 </div>

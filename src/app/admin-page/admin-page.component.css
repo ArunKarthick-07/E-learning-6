@@ -1,154 +1,619 @@
-/* Ensure the dashboard container takes full width */
-.dashboard-container {
-  width: 100%;
-  padding: 20px;
+/* Global box-sizing to prevent padding/border issues */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-/* Style the card to allow content to expand */
-.card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
-  overflow: visible; /* Allow content to overflow if needed */
-}
-
-/* Style the table */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: auto; /* Enable scrolling if content exceeds container */
-  max-height: 80vh; /* Optional: Limit table height with scrolling */
-}
-
-/* Ensure table header is visible */
-.table-header {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-/* Style table rows */
-.table-row {
-  border-bottom: 1px solid #ddd;
-}
-
-/* Make cells expandable */
-.expandable-table td,
-.expandable-table th {
-  padding: 10px;
-  vertical-align: top; /* Align content to the top */
-  word-wrap: break-word; /* Break long words */
-  max-width: 0; /* Allow cells to expand naturally */
-  overflow: visible; /* Ensure content is not hidden */
-  white-space: normal; /* Allow text to wrap */
-}
-
-/* Ensure lists (e.g., PDFs, YouTube Links, Enrolled Users) are fully visible */
-.expandable-cell ul {
+/* Reset default margins and paddings */
+body {
   margin: 0;
-  padding-left: 20px;
-  list-style-type: disc;
-  max-height: none; /* Remove any height limit */
-  overflow: visible; /* Ensure list items are not truncated */
+  padding: 0;
+  font-family: 'Arial', sans-serif;
 }
 
-.expandable-cell ul li {
-  margin-bottom: 5px;
-  word-break: break-all; /* Break long URLs or text */
+/* Main Container */
+.dashboard-container {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 40px 30px;
+  background: url('/assets/1.jpg') no-repeat center center fixed; /* Education-themed background */
+  background-size: cover;
+  color: #1A3C5A; /* Dark blue text */
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Optional: Add hover effect for better usability */
-.table-row:hover {
-  background-color: #f5f5f5;
+/* Add a semi-transparent overlay to improve readability */
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 0;
 }
 
-/* Ensure the card container doesn’t constrain the table */
-.mb-8 {
-  margin-bottom: 32px;
+/* Ensure all content is above the overlay */
+.dashboard-container > * {
+  position: relative;
+  z-index: 1;
 }
 
-/* Style error messages */
-.error {
-  color: red;
-  margin-top: 10px;
+/* Dashboard Title */
+.dashboard-title {
+  text-align: center;
+  color: #1A3C5A;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 40px 0;
+  position: relative;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.success {
-  color: green;
-  margin-top: 10px;
+.dashboard-title::before,
+.dashboard-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background-color: #00C4B4;
 }
 
-/* Style placeholder text */
-.placeholder-text {
-  color: #666;
+.dashboard-title::before {
+  left: calc(50% - 120px);
 }
 
-/* Ensure toggle buttons don’t affect table layout */
+.dashboard-title::after {
+  right: calc(50% - 120px);
+}
+
+/* Toggle Buttons */
 .toggle-buttons {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
 .toggle-button {
-  padding: 10px 20px;
-  margin-right: 10px;
+  background: linear-gradient(45deg, #1e90ff, #00b7eb);
+  color: white;
   border: none;
-  background-color: #ddd;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.toggle-button:hover {
+  background: linear-gradient(45deg, #1e7bff, #00a3d9);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(163, 216, 244, 0.7);
 }
 
 .toggle-button.active {
-  background-color: #007bff;
-  color: white;
+  background: linear-gradient(45deg, #00A8A1, #00C4B4);
 }
 
-.form-group {
+.toggle-button .icon {
+  margin-right: 8px;
+}
+
+/* Card (Section Container) */
+.card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  color: #1A3C5A;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #4ecdc4;
+  padding-bottom: 8px;
+}
+
+/* Course Grid */
+.course-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+}
+
+/* Course Card */
+.course-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.course-card.expanded {
+  width: 1000px;
+  min-height: 600px;
+}
+
+/* Course Header (Thumbnail and Info) */
+.course-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card.expanded .course-header {
+  flex-direction: row;
+}
+
+/* Course Thumbnail */
+.course-thumbnail {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.course-card.expanded .course-thumbnail {
+  width: 40%;
+  height: 100%;
+}
+
+/* Course Info Section */
+.course-info {
+  background-color: #E6F7FA;
+  padding: 20px;
+  text-align: left;
+}
+
+.course-card.expanded .course-info {
+  width: 60%;
+}
+
+.course-info h3 {
+  font-size: 18px;
+  color: #1A3C5A;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.course-info p {
+  font-size: 14px;
+  color: #5267A7;
+  margin: 5px 0;
+}
+
+/* Expand Icon */
+.expand-icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: #5267A7;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Course Details Panel */
+.course-details-panel {
+  margin-top: 15px;
+  padding: 30px;
+  border: 1px solid #4ecdc4;
+  border-radius: 8px;
+  background-color: #E6F7FA;
+}
+
+.course-card.expanded .course-details-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.course-card.expanded .course-details-panel .details-content {
+  width: 60%;
+  padding-left: 20px;
+}
+
+.course-details-panel h4 {
+  color: #1A3C5A;
+  padding: 10px;
+  margin: 0 0 10px 0;
+  border-bottom: 1px solid #4ecdc4;
+  font-size: 28px;
+}
+
+.course-details-panel strong {
+  font-size: 24px;
+  color: #1A3C5A;
+  display: block;
+  margin-top: 15px;
+}
+
+.course-details-panel p {
+  color: #5267A7;
+  font-size: 20px;
+}
+
+.course-details-panel .price {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1A3C5A;
+  margin-bottom: 10px;
+}
+
+.course-details-panel .resources > * {
+  margin-bottom: 10px;
+}
+
+/* Resources */
+.resources {
+  margin-top: 15px;
+}
+
+.resource-link {
+  display: block;
+  margin: 8px 0;
+  color: #1e90ff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.resource-link:hover {
+  text-decoration: underline;
+  color: #00b7eb;
+}
+
+.resource-section {
   margin-bottom: 15px;
 }
 
+/* Enrolled Users */
+.enrolled-users ul {
+  list-style: none;
+  padding: 0;
+}
+
+.enrolled-users li {
+  color: #5267A7;
+  font-size: 20px;
+  margin: 5px 0;
+}
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #E6F7FA;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table-header th {
+  background: linear-gradient(45deg, #4ECDC4, #7FE5E0);
+  color: #fff;
+  padding: 10px;
+  text-align: left;
+}
+
+.table-row td {
+  padding: 10px;
+  border: 1px solid #4ecdc4;
+  color: #1A3C5A;
+}
+
+.table-row:nth-child(even) {
+  background-color: #D6EAF8;
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-group label {
-  display: block;
+  font-weight: bold;
+  color: #1A3C5A;
   margin-bottom: 5px;
 }
 
 .form-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #4ecdc4;
+  border-radius: 6px;
+  font-size: 16px;
 }
 
-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #007bff;
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Buttons */
+.submit-button {
+  background: linear-gradient(45deg, #1e90ff, #00b7eb);
   color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-button[disabled] {
-  background-color: #ccc;
+.submit-button:hover {
+  background: linear-gradient(45deg, #1e7bff, #00a3d9);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(163, 216, 244, 0.7);
+}
+
+.submit-button:disabled {
+  background: #cccccc;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.cancel {
-  background-color: #dc3545;
-  margin-left: 10px;
+.cancel-button {
+  background: linear-gradient(45deg, #dc3545, #ff4d4d);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cancel-button:hover {
+  background: linear-gradient(45deg, #c82333, #e63946);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .button.approve {
-  background-color: #28a745;
+  background: linear-gradient(45deg, #28a745, #34c759);
+  color: white;
+}
+
+.button.approve:hover {
+  background: linear-gradient(45deg, #218838, #2ba84a);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.7);
 }
 
 .button.reject {
-  background-color: #dc3545;
-  margin-left: 5px;
+  background: linear-gradient(45deg, #dc3545, #ff4d4d);
+  color: white;
 }
 
-.delete-button {
-  background-color: #dc3545;
-  margin-left: 10px;
+.button.reject:hover {
+  background: linear-gradient(45deg, #c82333, #e63946);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+}
+
+.button.edit {
+  background: linear-gradient(45deg, #1e90ff, #00b7eb);
+  color: white;
+}
+
+.button.edit:hover {
+  background: linear-gradient(45deg, #1e7bff, #00a3d9);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(163, 216, 244, 0.7);
+}
+
+.button.delete {
+  background: linear-gradient(45deg, #dc3545, #ff4d4d);
+  color: white;
+}
+
+.button.delete:hover {
+  background: linear-gradient(45deg, #c82333, #e63946);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+}
+
+.action-icon {
+  margin-right: 5px;
+}
+
+/* Logout Button */
+.logout-button {
+  background: linear-gradient(45deg, #008080, #00A8A1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+  margin: 30px auto;
+}
+
+.logout-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 196, 180, 0.7);
+}
+
+.logout-icon {
+  margin-right: 8px;
+}
+
+/* Placeholder Text */
+.placeholder-text {
+  text-align: center;
+  color: #a3d8f4;
+  font-size: 18px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.empty-icon {
+  margin-right: 8px;
+}
+
+/* Success and Error Messages */
+.success {
+  color: #28a745;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+.success-icon {
+  margin-right: 8px;
+}
+
+.error {
+  color: #dc3545;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+.error-icon {
+  margin-right: 8px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+
+  .dashboard-title {
+    font-size: 28px;
+  }
+
+  .toggle-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toggle-button {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .course-card {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .course-card.expanded {
+    width: 100%;
+    min-height: 700px;
+  }
+
+  .course-card.expanded .course-header {
+    flex-direction: column;
+  }
+
+  .course-card.expanded .course-thumbnail {
+    width: 100%;
+    height: 200px;
+  }
+
+  .course-card.expanded .course-info {
+    width: 100%;
+  }
+
+  .course-card.expanded .course-details-panel {
+    flex-direction: column;
+  }
+
+  .course-card.expanded .course-details-panel .details-content {
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .course-details-panel h4 {
+    font-size: 24px;
+  }
+
+  .course-details-panel strong {
+    font-size: 20px;
+  }
+
+  .course-details-panel p {
+    font-size: 16px;
+  }
+
+  .course-details-panel .price {
+    font-size: 26px;
+  }
+
+  .resource-link {
+    font-size: 16px;
+  }
+
+  .enrolled-users li {
+    font-size: 16px;
+  }
+
+  .table-container {
+    font-size: 14px;
+  }
+
+  .table-header th,
+  .table-row td {
+    padding: 8px;
+  }
+
+  .form-group input {
+    font-size: 14px;
+  }
+
+  .submit-button,
+  .cancel-button,
+  .logout-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 }

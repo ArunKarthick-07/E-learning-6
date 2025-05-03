@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -44,17 +44,23 @@ interface Assessment {
   }[];
 }
 
+interface AssessmentResponse {
+  assessment: Assessment;
+}
+
 interface Mark {
   assessmentId: string;
   assessmentName: string;
   marks: number;
   courseName: string;
   date: Date;
+  courseId?: string;
 }
 
 interface UserAnswer {
   questionIndex: number;
   selectedAnswer: number;
+  _id?: string;
 }
 
 interface ReviewData {
@@ -75,6 +81,8 @@ export class UserPageComponent implements OnInit {
   userName: string = '';
   enrolledCourses: Course[] = [];
   availableCourses: Course[] = [];
+  filteredEnrolledCourses: Course[] = [];
+  filteredAvailableCourses: Course[] = [];
   selectedCourse: Course | null = null;
   assessments: Assessment[] = [];
   showPaymentModal: boolean = false;
@@ -119,6 +127,8 @@ export class UserPageComponent implements OnInit {
         }
       } else {
         console.error('No userId provided in query params or localStorage');
+        alert('User ID not found. Please log in again.');
+        this.router.navigate(['/']);
       }
     });
 
@@ -128,9 +138,13 @@ export class UserPageComponent implements OnInit {
       console.log('Loaded enrolled courses from localStorage:', this.enrolledCourses);
       this.enrolledCourses = this.enrolledCourses.map(course => this.normalizeCourse(course));
       localStorage.setItem('selectedCourses', JSON.stringify(this.enrolledCourses));
+      this.filteredEnrolledCourses = [...this.enrolledCourses];
     } else {
       console.log('No enrolled courses in localStorage');
+      this.filteredEnrolledCourses = [];
     }
+
+    this.filteredAvailableCourses = [...this.availableCourses];
   }
 
   loadPastMarks(userId: string): void {
@@ -144,10 +158,11 @@ export class UserPageComponent implements OnInit {
         } else {
           this.marks = data.marks.map(mark => ({
             ...mark,
-            assessmentId: mark.assessmentId || ''
+            assessmentId: mark.assessmentId || '',
+            courseId: mark.courseId
           }));
         }
-        console.log('Past marks loaded:', this.marks);
+        console.log('Processed marks:', this.marks);
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -188,9 +203,11 @@ export class UserPageComponent implements OnInit {
         this.enrolledCourses.forEach(course => {
           this.showCourseDetails[course.id] = false;
         });
+        this.filteredEnrolledCourses = [...this.enrolledCourses];
       },
       error: (err) => {
         console.error('Error fetching enrolled courses:', err);
+        this.filteredEnrolledCourses = [];
       }
     });
   }
@@ -200,9 +217,11 @@ export class UserPageComponent implements OnInit {
       next: (courses) => {
         this.availableCourses = courses.map(course => this.normalizeCourse(course));
         console.log('Available courses:', this.availableCourses);
+        this.filteredAvailableCourses = [...this.availableCourses];
       },
       error: (err) => {
         console.error('Error fetching available courses:', err);
+        this.filteredAvailableCourses = [];
       }
     });
   }
@@ -217,7 +236,7 @@ export class UserPageComponent implements OnInit {
       next: (response) => {
         this.assessments = response.assessments.filter(assessment => assessment.courseId === courseId);
         console.log('Assessments for course:', this.assessments);
-        this.cdr.detectChanges(); // Ensure UI updates after async operation
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error fetching assessments:', err);
@@ -227,15 +246,7 @@ export class UserPageComponent implements OnInit {
     });
   }
 
-  selectCourse(course: Course): void {
-    this.selectedCourse = { ...this.normalizeCourse(course) };
-    console.log('Step 5: Selected course details:', JSON.stringify(this.selectedCourse, null, 2));
-    console.log('Step 6: Selected course youtubeLinks:', this.selectedCourse.youtubeLinks);
-    this.loadAssessments(course.id);
-  }
-
   toggleCourseDetails(courseId: string): void {
-    // Find the course to set as selectedCourse
     const course = this.enrolledCourses.find(c => c.id === courseId);
     if (course) {
       this.selectedCourse = { ...this.normalizeCourse(course) };
@@ -243,7 +254,7 @@ export class UserPageComponent implements OnInit {
       if (this.showCourseDetails[courseId]) {
         this.loadAssessments(courseId);
       } else {
-        this.assessments = []; // Clear assessments when collapsing
+        this.assessments = [];
       }
     } else {
       console.error(`Course with id ${courseId} not found`);
@@ -283,31 +294,60 @@ export class UserPageComponent implements OnInit {
 
   reviewExam(assessmentId: string): void {
     console.log('Reviewing assessment:', assessmentId);
+    const userId = this.route.snapshot.queryParams['id'] || localStorage.getItem('userId');
+    console.log('User ID:', userId);
     if (!assessmentId) {
       console.error('No assessmentId provided for review');
       alert('Invalid assessment ID.');
       return;
     }
-
-    const userId = this.route.snapshot.queryParams['id'] || localStorage.getItem('userId');
     if (!userId) {
       console.error('No userId found for review');
-      alert('User ID not found.');
+      alert('User ID not found. Please log in again.');
+      this.router.navigate(['/']);
       return;
     }
 
-    this.http.get<Assessment>(`http://localhost:3000/api/assessments/${assessmentId}`).subscribe({
-      next: (assessment) => {
-        console.log('Fetched assessment:', assessment);
-        this.http.get<UserAnswer[]>(`http://localhost:3000/api/assessment_mark/answers/${userId}/${assessmentId}`).subscribe({
+    const mark = this.marks.find(m => m.assessmentId === assessmentId);
+    if (!mark) {
+      console.error('Mark not found for assessmentId:', assessmentId);
+      alert('Assessment not found in your marks.');
+      return;
+    }
+
+    const course = this.enrolledCourses.find(c => c.title === mark.courseName);
+    if (!course || !course.instructorId) {
+      console.error('Course or instructorId not found for courseName:', mark.courseName);
+      alert('Instructor ID not found for this course. Please contact support.');
+      return;
+    }
+
+    const instructorId = course.instructorId;
+    console.log('Instructor ID for course:', instructorId);
+
+    const headers = new HttpHeaders()
+      .set('user-id', userId)
+      .set('instructor-id', instructorId);
+
+    this.http.get<AssessmentResponse>(`http://localhost:3000/api/assessments/${assessmentId}`, { headers }).subscribe({
+      next: (response) => {
+        const assessment = response.assessment;
+        console.log('Fetched assessment:', JSON.stringify(assessment, null, 2));
+        this.http.get<UserAnswer[]>(`http://localhost:3000/api/assessment_mark/answers/${userId}/${assessmentId}`, { headers }).subscribe({
           next: (userAnswers) => {
-            console.log('Fetched user answers:', userAnswers);
+            console.log('Fetched user answers (stringified for clarity):', JSON.stringify(userAnswers, null, 2));
+            if (!userAnswers || userAnswers.length === 0) {
+              console.error('No user answers fetched');
+              alert('No answers found for this assessment. It’s possible your submission was not recorded correctly.');
+              return;
+            }
             this.reviewData = { assessment, userAnswers };
             this.showReviewModal = true;
             this.cdr.detectChanges();
+            setTimeout(() => this.cdr.detectChanges(), 0);
           },
           error: (err) => {
-            console.error('Error fetching user answers:', err);
+            console.error('HTTP error fetching user answers:', err);
             alert('Failed to load user answers: ' + (err.statusText || err.message || 'Unknown error'));
           }
         });
@@ -333,7 +373,19 @@ export class UserPageComponent implements OnInit {
   }
 
   getUserAnswer(qIndex: number): number | undefined {
-    return this.reviewData?.userAnswers?.[qIndex]?.selectedAnswer;
+    console.log('getUserAnswer called with qIndex:', qIndex);
+    console.log('Current reviewData.userAnswers:', JSON.stringify(this.reviewData?.userAnswers, null, 2));
+    const answer = this.reviewData?.userAnswers?.find(answer => {
+      const questionIndex = Number(answer.questionIndex);
+      console.log(`Comparing questionIndex: ${questionIndex} with qIndex: ${qIndex}`);
+      return questionIndex === qIndex;
+    });
+    console.log('Found answer:', answer);
+    const selectedAnswer = answer ? Number(answer.selectedAnswer) : undefined;
+    console.log('Selected answer (before adjustment):', selectedAnswer);
+    const result = selectedAnswer !== undefined ? selectedAnswer - 1 : undefined;
+    console.log('Returning adjusted result (selectedAnswer - 1):', result);
+    return result;
   }
 
   initiateEnrollment(course: Course): void {
@@ -498,7 +550,7 @@ export class UserPageComponent implements OnInit {
       const date = new Date().toLocaleDateString();
 
       doc.setFontSize(20);
-      doc.text('aa E-learning', 105, 20, { align: 'center' });
+      doc.text('E-learning', 105, 20, { align: 'center' });
 
       doc.setFontSize(18);
       doc.text('Receipt', 105, 35, { align: 'center' });
@@ -535,5 +587,17 @@ export class UserPageComponent implements OnInit {
     localStorage.removeItem('selectedCourses');
     this.router.navigate(['/']);
     console.log('User logged out');
+  }
+
+  filterCourses(event: Event): void {
+    const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
+
+    this.filteredEnrolledCourses = this.enrolledCourses.filter(course =>
+      course.title.toLowerCase().includes(searchTerm)
+    );
+
+    this.filteredAvailableCourses = this.availableCourses.filter(course =>
+      course.title.toLowerCase().includes(searchTerm)
+    );
   }
 }

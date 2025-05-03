@@ -15,6 +15,8 @@ import { ViewAssessmentsComponent } from './view-assessments/view-assessments.co
 import { ExamPageComponent } from './exam-page/exam-page.component';
 import { ProfileComponent } from './profile/profile.component';
 import { ViewStudentMarklistComponent } from './view-student-marklist/view-student-marklist.component';
+import { AssessmentDetailComponent } from './assessment-detail/assessment-detail.component';
+import { EditAssessmentComponent } from './edit-assessment/edit-assessment.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -33,5 +35,7 @@ export const routes: Routes = [
   {path: 'admin-page', component: AdminPageComponent},
   { path: 'exam', component: ExamPageComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'edit-assessment/:id', component: EditAssessmentComponent },
+  { path: 'assessment-detail/:id', component: AssessmentDetailComponent },
   { path: '**', redirectTo: '' }
 ];

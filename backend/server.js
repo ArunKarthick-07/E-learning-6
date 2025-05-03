@@ -78,6 +78,15 @@ const courseSchema = new mongoose.Schema({
 }, { collection: 'courses' });
 const Course = mongoose.model('Course', courseSchema);
 
+// Notification Schema
+const notificationSchema = new mongoose.Schema({
+  instructorId: { type: String, required: true },
+  message: { type: String, required: true },
+  read: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+}, { collection: 'notifications' });
+const Notification = mongoose.model('Notification', notificationSchema);
+
 // Pending Course Schema
 const pendingCourseSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -94,14 +103,16 @@ const pendingCourseSchema = new mongoose.Schema({
 const PendingCourse = mongoose.model('PendingCourse', pendingCourseSchema);
 
 // Assessment Schema
+const questionSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  options: { type: [String], required: true, validate: v => v.length === 4 },
+  correctAnswer: { type: Number, required: true, min: 1, max: 4 },
+  marks: { type: Number, required: true, min: 1 }
+});
+
 const assessmentSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  questions: [{
-    text: { type: String, required: true },
-    options: { type: [String], required: true, validate: v => v.length === 4 },
-    correctAnswer: { type: Number, required: true, min: 1, max: 4 },
-    marks: { type: Number, required: true, min: 1 }
-  }],
+  questions: [questionSchema],
   timeLimit: { type: Number, required: true, min: 1 },
   instructorId: { type: String, required: true },
   courseId: { type: String, required: true },
@@ -139,6 +150,73 @@ const enrollmentSchema = new mongoose.Schema({
   courseId: { type: String, required: true }
 }, { collection: 'enrollments' });
 const Enrollment = mongoose.model('Enrollment', enrollmentSchema);
+
+// Middleware to verify access for viewing assessments
+const verifyAccessForView = async (req, res, next) => {
+  const userId = req.headers['user-id'];
+  const instructorId = req.headers['instructor-id'];
+  console.log('verifyAccessForView - Received headers:', { userId, instructorId });
+
+  if (!userId && !instructorId) {
+    return res.status(403).json({ message: 'User ID or Instructor ID required in headers' });
+  }
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid assessment ID format' });
+    }
+
+    const assessment = await Assessment.findById(req.params.id);
+    if (!assessment) {
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+
+    // If instructorId is provided, verify the instructor
+    if (instructorId) {
+      if (assessment.instructorId !== instructorId) {
+        return res.status(403).json({ message: 'Unauthorized: Instructor ID does not match' });
+      }
+      return next();
+    }
+
+    // If userId is provided, verify the student has taken the assessment
+    if (userId) {
+      const submission = await Submission.findOne({ studentId: userId, assessmentId: req.params.id });
+      if (!submission) {
+        return res.status(403).json({ message: 'Unauthorized: You have not taken this assessment' });
+      }
+      return next();
+    }
+  } catch (error) {
+    console.error('Error in verifyAccessForView:', error);
+    res.status(500).json({ message: 'Server error during verification', error: error.message });
+  }
+};
+
+// Middleware to verify instructor for modification (strict)
+const verifyInstructorForModify = async (req, res, next) => {
+  const instructorId = req.headers['instructor-id'];
+  console.log('verifyInstructorForModify - Received instructor-id:', instructorId);
+  if (!instructorId) {
+    return res.status(403).json({ message: 'Instructor ID required in headers' });
+  }
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id || req.params.assessmentId)) {
+      return res.status(400).json({ message: 'Invalid assessment ID format' });
+    }
+    const assessment = await Assessment.findById(req.params.id || req.params.assessmentId);
+    if (!assessment) {
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+    if (assessment.instructorId !== instructorId) {
+      return res.status(403).json({ message: 'Unauthorized: You can only modify your own assessments' });
+    }
+    next();
+  } catch (error) {
+    console.error('Error in verifyInstructorForModify:', error);
+    res.status(500).json({ message: 'Server error during verification', error: error.message });
+  }
+};
 
 // Routes
 
@@ -450,9 +528,9 @@ app.get('/api/assessments/course/:courseId', async (req, res) => {
 });
 
 // Get Single Assessment
-app.get('/api/assessments/:assessmentId', async (req, res) => {
+app.get('/api/assessments/:id', verifyAccessForView, async (req, res) => {
   try {
-    const assessmentId = req.params.assessmentId;
+    const assessmentId = req.params.id;
     console.log('Fetching assessment with ID:', assessmentId);
 
     const assessment = await Assessment.findById(assessmentId);
@@ -461,9 +539,74 @@ app.get('/api/assessments/:assessmentId', async (req, res) => {
       return res.status(404).json({ message: 'Assessment not found' });
     }
 
-    res.json(assessment);
+    res.json({ assessment });
   } catch (error) {
     console.error('Error fetching assessment:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Update Assessment
+app.put('/api/assessments/:id', verifyInstructorForModify, async (req, res) => {
+  try {
+    const assessmentId = req.params.id;
+    const { title, questions, timeLimit } = req.body;
+    console.log('Updating assessment:', assessmentId, { title, questions, timeLimit });
+
+    if (!title || !questions || !timeLimit) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ message: 'Please provide at least one question' });
+    }
+
+    for (const q of questions) {
+      if (!q.text || !q.options || q.options.length !== 4 || !q.correctAnswer || !q.marks) {
+        return res.status(400).json({ message: 'Each question must have text, 4 options, a correct answer, and marks' });
+      }
+      if (q.correctAnswer < 1 || q.correctAnswer > 4) {
+        return res.status(400).json({ message: 'Correct answer must be between 1 and 4' });
+      }
+      if (q.marks < 1) {
+        return res.status(400).json({ message: 'Marks must be at least 1' });
+      }
+    }
+
+    const updatedAssessment = await Assessment.findByIdAndUpdate(
+      assessmentId,
+      { title, questions, timeLimit },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAssessment) {
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+
+    res.json({ message: 'Assessment updated successfully', assessment: updatedAssessment });
+  } catch (error) {
+    console.error('Error updating assessment:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Delete Assessment
+app.delete('/api/assessments/:id', verifyInstructorForModify, async (req, res) => {
+  try {
+    const assessmentId = req.params.id;
+    console.log('Deleting assessment:', assessmentId);
+
+    const assessment = await Assessment.findByIdAndDelete(assessmentId);
+    if (!assessment) {
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+
+    // Optionally delete associated submissions
+    await Submission.deleteMany({ assessmentId });
+
+    res.json({ message: 'Assessment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting assessment:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -723,10 +866,11 @@ app.get('/api/assessment_mark/student/:studentId', async (req, res) => {
       }
       const course = await Course.findById(assessment.courseId).select('name');
       return {
-        assessmentId: submission.assessmentId, // Include assessmentId
+        assessmentId: submission.assessmentId,
         assessmentName: assessment.title || 'Unknown Assessment',
         marks: submission.score,
         courseName: course ? course.name : 'Unknown Course',
+        courseId: assessment.courseId, // Include courseId for better frontend mapping
         date: submission.submittedAt
       };
     }));
@@ -745,6 +889,7 @@ app.get('/api/assessment_mark/answers/:userId/:assessmentId', async (req, res) =
     const { userId, assessmentId } = req.params;
     console.log('Fetching user answers for userId:', userId, 'and assessmentId:', assessmentId);
 
+    // Verify that the userId matches the student who submitted the assessment
     const submission = await Submission.findOne({ studentId: userId, assessmentId });
     if (!submission) {
       console.log('No submission found for userId:', userId, 'and assessmentId:', assessmentId);
@@ -856,10 +1001,52 @@ app.post('/api/pending-courses/approve/:id', async (req, res) => {
     await newCourse.save();
     await PendingCourse.findByIdAndDelete(id);
 
+    // Create a notification for the instructor
+    const notification = new Notification({
+      instructorId: pendingCourse.instructorId,
+      message: `Your course "${pendingCourse.name}" has been approved.`,
+      read: false
+    });
+    await notification.save();
+    console.log(`Notification sent to instructor ${pendingCourse.instructorId}: Course ${id} approved`);
+
     console.log(`Course ${id} approved and moved to courses collection`);
     res.json({ message: 'Course approved successfully' });
   } catch (error) {
     console.error('Error approving course:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get Notifications for Instructor
+app.get('/api/notifications/instructor/:instructorId', async (req, res) => {
+  try {
+    const instructorId = req.params.instructorId;
+    const notifications = await Notification.find({ instructorId })
+      .sort({ createdAt: -1 })
+      .limit(10); // Limit to 10 recent notifications
+    res.json({ message: 'Notifications retrieved successfully', notifications });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Mark Notification as Read
+app.put('/api/notifications/:id/read', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { read: true },
+      { new: true }
+    );
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    res.json({ message: 'Notification marked as read', notification });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -874,6 +1061,15 @@ app.post('/api/pending-courses/reject/:id', async (req, res) => {
       return res.status(404).json({ message: 'Pending course not found' });
     }
 
+    // Create a notification for the instructor
+    const notification = new Notification({
+      instructorId: pendingCourse.instructorId,
+      message: `Your course "${pendingCourse.name}" has been rejected.`,
+      read: false
+    });
+    await notification.save();
+    console.log(`Notification sent to instructor ${pendingCourse.instructorId}: Course ${id} rejected`);
+
     await PendingCourse.findByIdAndDelete(id);
 
     console.log(`Course ${id} rejected and removed`);
@@ -884,19 +1080,30 @@ app.post('/api/pending-courses/reject/:id', async (req, res) => {
   }
 });
 
-// View Courses for Instructor
+// View Courses for Instructor - Updated to return empty array instead of 404
 app.get('/api/courses/instructor/:instructorId', async (req, res) => {
   const { instructorId } = req.params;
   console.log('Fetching courses for instructorId:', instructorId);
 
   try {
-    const courses = await Course.find({ instructorId }).sort({ createdAt: -1 });
-    if (!courses || courses.length === 0) {
-      console.log('No courses found:', instructorId);
-      return res.status(404).json({ message: 'No courses found for this instructor' });
+    // Validate instructorId format
+    if (!mongoose.Types.ObjectId.isValid(instructorId)) {
+      console.log('Invalid instructorId format:', instructorId);
+      return res.status(400).json({ message: 'Invalid instructor ID format' });
     }
 
-    res.json({ message: 'Courses retrieved successfully', courses });
+    // Check if instructor exists
+    const instructor = await Instructor.findById(instructorId);
+    if (!instructor) {
+      console.log('Instructor not found:', instructorId);
+      return res.status(404).json({ message: 'Instructor not found' });
+    }
+
+    const courses = await Course.find({ instructorId }).sort({ createdAt: -1 });
+    console.log(`Found ${courses.length} courses for instructorId:`, instructorId);
+
+    // Return empty array instead of 404 if no courses are found
+    res.json({ message: 'Courses retrieved successfully', courses: courses || [] });
   } catch (error) {
     console.error('Error fetching courses:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -1036,6 +1243,52 @@ app.post('/api/courses/:id/upload', upload.fields([
   } catch (error) {
     console.error('Error uploading files:', error);
     res.status(500).json({ message: 'Failed to upload files', error: error.message });
+  }
+});
+
+// Update Thumbnail for a Course
+app.put('/api/courses/:courseId/thumbnail', upload.single('thumbnail'), async (req, res) => {
+  const { courseId } = req.params;
+  const instructorId = req.headers['instructor-id'];
+
+  console.log(`Received thumbnail update request for course: ${courseId}, instructor: ${instructorId}`);
+
+  try {
+    // Verify the course exists
+    const course = await Course.findById(courseId);
+    if (!course) {
+      console.log(`Course not found: ${courseId}`);
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Verify the instructor is authorized to update this course
+    console.log(`Course instructorId: ${course.instructorId}, Request instructorId: ${instructorId}`);
+    if (course.instructorId.toString() !== instructorId) {
+      console.log(`Unauthorized: Instructor ${instructorId} cannot update course ${courseId}`);
+      return res.status(403).json({ message: 'Unauthorized: You can only update your own courses' });
+    }
+
+    // Check if a thumbnail file was uploaded
+    const thumbnailFile = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!thumbnailFile) {
+      console.log('No thumbnail file uploaded');
+      return res.status(400).json({ message: 'No thumbnail file uploaded' });
+    }
+    console.log(`Uploaded thumbnail file: ${thumbnailFile}`);
+
+    // Update the course with the new thumbnail path
+    course.thumbnail = thumbnailFile;
+    const updatedCourse = await course.save();
+    console.log(`Updated course in database: ${JSON.stringify(updatedCourse)}`);
+
+    console.log(`Thumbnail updated successfully for course: ${courseId}, new thumbnail: ${thumbnailFile}`);
+    res.json({
+      message: 'Thumbnail updated successfully',
+      course: updatedCourse
+    });
+  } catch (error) {
+    console.error('Error updating thumbnail:', error);
+    res.status(500).json({ message: 'Failed to update thumbnail', error: error.message });
   }
 });
 

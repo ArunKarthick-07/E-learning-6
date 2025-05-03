@@ -1,11 +1,57 @@
-<div class="instructor-home-container" >
-  <!-- Header Section -->
-  <div class="header">
-    <h2>Welcome, {{ username }}!</h2>
-    <p *ngIf="isLoading" class="loading">Loading course count...</p>
-    <p *ngIf="!isLoading &&
+<div class="instructor-page-container animate-fade-in">
+  <!-- Navigation Bar (Same as User Page) -->
+  <nav class="nav-bar">
+    <div class="nav-logo">E-LEARNING</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+     
+    </div>
+    <div class="nav-buttons">
+      
+      <button (click)="logout()" class="logout-button">Logout</button>
+    </div>
+  </nav>
 
- !error" class="course-count">
+  <!-- Welcome Section -->
+  <h1 class="animate-bounce">Welcome, {{ username }}!</h1>
+
+  <!-- Notifications Toggle Button -->
+  <div class="toggle-container">
+    <button class="toggle-notifications" (click)="toggleNotifications()">
+      <span *ngIf="!showNotifications">▼ Notifications</span>
+      <span *ngIf="showNotifications">▲ Hide Notifications</span>
+    </button>
+  </div>
+
+  <!-- Notifications Section -->
+  <div class="notifications-section" *ngIf="showNotifications">
+    <h2>Notifications</h2>
+    <div class="notifications-list" *ngIf="notifications.length > 0; else noNotifications">
+      <div
+        *ngFor="let notification of notifications"
+        class="notification-item"
+        [class.read]="notification.read"
+      >
+        <p>{{ notification.message }}</p>
+        <span class="notification-date">{{ notification.createdAt | date:'short' }}</span>
+        <button
+          *ngIf="!notification.read"
+          (click)="markNotificationAsRead(notification._id)"
+          class="mark-read"
+        >
+          Mark as Read
+        </button>
+      </div>
+    </div>
+    <ng-template #noNotifications>
+      <p class="no-notifications">No notifications available.</p>
+    </ng-template>
+  </div>
+
+  <!-- Header Section with Course Count -->
+  <div class="header">
+    <p *ngIf="isLoading" class="loading">Loading course count...</p>
+    <p *ngIf="!isLoading" class="course-count">
       You have created <strong>{{ courseCount }}</strong> {{ courseCount === 1 ? 'course' : 'courses' }}.
     </p>
     <p *ngIf="error" class="error-message">{{ error }}</p>
@@ -16,15 +62,16 @@
     <h2>Your Courses</h2>
     <div class="course-list" *ngIf="courses.length > 0; else noCourses">
       <div
-        *ngFor="let course of courses"
-        class="course-card"
+        *ngFor="let course of courses; let i = index"
+        class="course-card animate-slide-in"
+        [style.--delay]="i * 0.2 + 's'"
         (click)="selectCourse(course)"
         [class.selected]="selectedCourse?._id === course._id"
       >
-        <img [src]="course.thumbnail" alt="Course Thumbnail" class="course-thumbnail">
+        <img [src]="course.thumbnail || 'assets/3.jpg'" alt="Course Thumbnail" class="course-thumbnail">
         <div class="course-info">
           <h3>{{ course.name }}</h3>
-          <p>{{ course.description | slice:0:50 }}{{ course.description.length > 50 ? '...' : '' }}</p>
+          <p>{{ course.description | slice:0:100 }}{{ course.description.length > 100 ? '...' : '' }}</p>
         </div>
       </div>
     </div>
@@ -35,6 +82,7 @@
 
   <!-- Selected Course Details -->
   <div *ngIf="selectedCourse" class="course-details">
+    <button (click)="closeDetails()" class="close-button">×</button>
     <h2>Selected Course: {{ selectedCourse.name }}</h2>
     <p><strong>Description:</strong> {{ selectedCourse.description }}</p>
     <p><strong>Contents:</strong> {{ selectedCourse.contents }}</p>
@@ -45,11 +93,22 @@
   <div class="actions-card">
     <h3>Manage Your Courses and Assessments</h3>
     <div class="button-group">
-      <button (click)="createCourse()" class="action-button create">Create Course</button>
-      <button (click)="viewCourses()" class="action-button view">View Courses</button>
-      <button (click)="createAssessment()" class="action-button create-assessment">Create Assessment</button>
-      <button (click)="viewAssessments()" class="action-button view-assessments">View Assessments</button>
-      <button (click)="logout()" class="action-button logout">Logout</button>
+      <button (click)="createCourse()" class="action-button create">
+        <img src="/assets/6.png" alt="Create Course Icon" class="button-icon">
+        Create Course
+      </button>
+      <button (click)="viewCourses()" class="action-button view">
+        <img src="/assets/3.png" alt="View Courses Icon" class="button-icon">
+        View Courses
+      </button>
+      <button (click)="createAssessment()" class="action-button create-assessment">
+        <img src="/assets/4.png" alt="Create Assessment Icon" class="button-icon">
+        Create Assessment
+      </button>
+      <button (click)="viewAssessments()" class="action-button view-assessments">
+        <img src="/assets/5.png" alt="View Assessments Icon" class="button-icon">
+        View Assessments
+      </button>
     </div>
   </div>
 </div>

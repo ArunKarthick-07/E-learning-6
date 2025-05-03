@@ -1,49 +1,113 @@
-<div class="courses-container" (click)="$event.stopPropagation()">
-  <h2>Your Courses</h2>
-  <div *ngIf="isLoading" class="loading">Loading...</div>
-  <div *ngIf="!isLoading && errorMessage" class="no-courses">
-    {{ errorMessage }}
+<div class="view-courses-container">
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-logo">EduPlatform</div>
+    <div class="nav-links">
+      <a [routerLink]="['/instructor']">Instructor Dashboard</a>
+      <a [routerLink]="['/my-courses']">My Courses</a>
+      <a [routerLink]="['/view-courses']">View Courses</a>
+    </div>
+    <div class="nav-buttons">
+      <button class="profile-button" (click)="goToProfile()">Profile</button>
+      <button class="logout-button" (click)="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <h1>View Courses</h1>
+  <div class="loading" *ngIf="isLoading">
+    <span class="spinner"></span> Loading courses...
   </div>
-  <div *ngIf="!isLoading && courses.length === 0 && !errorMessage" class="no-courses">
-    No courses found.
+  <div class="no-courses" *ngIf="!isLoading && courses.length === 0">
+    <span class="empty-icon">📚</span> {{ errorMessage || 'You have created 0 courses' }}
   </div>
-  <div *ngIf="!isLoading && courses.length > 0" class="courses-list">
-    <div *ngFor="let course of courses" class="course-card" (click)="$event.stopPropagation()">
-      <div class="course-header" (click)="$event.stopPropagation()">
-        <div *ngIf="course.thumbnail" class="thumbnail">
-          <img [src]="getThumbnailUrl(course.thumbnail)" (error)="handleImageError($event)" alt="{{course.name}} thumbnail" />
+  <div class="course-list" *ngIf="!isLoading && courses.length > 0">
+    <div class="course-card" *ngFor="let course of courses" [ngClass]="{ expanded: focusedCourseId === course._id }">
+      <div class="course-header">
+        <img class="course-thumbnail" [src]="getThumbnailUrl(course.thumbnail)" alt="Course Thumbnail" (error)="handleImageError($event)">
+        <div class="button-group">
+          <button (click)="onEditClick(course, $event)">Edit</button>
+          <button (click)="deleteCourse(course._id)">Delete</button>
         </div>
-        <div class="course-name-container" (click)="$event.stopPropagation()">
-          <span class="course-name-text" (click)="toggleDetails(course); $event.stopPropagation()">
-            {{course.name}} <span class="toggle-icon">{{course.showDetails ? '▼' : '▶'}}</span>
-          </span>
-          <a [routerLink]="['/edit-course', course._id]" style="color: #28a745; margin-left: 10px;" (click)="onEditClick(course, $event)">Edit</a>
-          <button (click)="deleteCourse(course._id); $event.stopPropagation()" class="delete-button">Delete</button>
+        <div class="course-info">
+          <h3>{{ course.name }}</h3>
+          <p>{{ course.description }}</p>
         </div>
+        <span class="expand-icon" (click)="toggleFocus(course._id)">
+          {{ focusedCourseId === course._id ? '⬇️' : '⬆️' }}
+        </span>
       </div>
-      <div *ngIf="course.showDetails" class="course-details">
-        <p><strong>Description:</strong> {{course.description}}</p>
-        <p><strong>Contents:</strong> {{course.contents}}</p>
-        <p><strong>Price:</strong> Rs.{{course.price.toFixed(2)}}</p>
-        <div *ngIf="course.pdfs.length > 0">
-          <strong>PDFs:</strong>
-          <ul>
-            <li *ngFor="let pdf of course.pdfs">
-              <a [href]="backendBaseUrl + pdf" target="_blank">{{ pdf.split('/').pop() }}</a>
-            </li>
-          </ul>
+      <div class="course-details-panel" *ngIf="focusedCourseId === course._id">
+        <div class="details-content">
+          <h4>Course Details</h4>
+          <p><strong>Description:</strong> {{ course.description }}</p>
+          <p><strong>Contents:</strong> {{ course.contents }}</p>
+          <p class="price"><strong>Price:</strong> ${{ course.price }}</p>
+          <div class="resources">
+            <div class="resource-section">
+              <strong>PDFs</strong>
+              <ul *ngIf="course.pdfs.length > 0; else noPdfs">
+                <li *ngFor="let pdf of course.pdfs; let i = index">
+                  <a class="resource-link" [href]="pdf" target="_blank">
+                    pdf{{ i + 1 }}
+                  </a>
+                </li>
+              </ul>
+              <ng-template #noPdfs>
+                <p>No PDFs</p>
+              </ng-template>
+            </div>
+            <div class="resource-section">
+              <strong>YouTube Links</strong>
+              <ul *ngIf="course.youtubeLinks.length > 0; else noVideos">
+                <li *ngFor="let link of course.youtubeLinks; let i = index">
+                  <a class="resource-link" [href]="link" target="_blank">
+                    video{{ i + 1 }}
+                  </a>
+                </li>
+              </ul>
+              <ng-template #noVideos>
+                <p>No YouTube Links</p>
+              </ng-template>
+            </div>
+          </div>
+          <div class="enrolled-students">
+            <h4>Enrolled Students</h4>
+            <div class="loading-students" *ngIf="!studentsLoaded[course._id]">
+              Loading students...
+            </div>
+            <div class="students-table-container" *ngIf="studentsLoaded[course._id]">
+              <table class="students-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="enrolledStudents[course._id]?.length === 0">
+                    <td colspan="2">No students enrolled</td>
+                  </tr>
+                  <tr *ngFor="let student of enrolledStudents[course._id]">
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="thumbnail-update">
+            <label for="thumbnail-{{course._id}}">Update Thumbnail:</label>
+            <input type="file" id="thumbnail-{{course._id}}" (change)="onThumbnailChange(course._id, $event)">
+            <button class="update-button" (click)="updateThumbnail()" [disabled]="!selectedFile || selectedCourseId !== course._id">
+              Update Thumbnail
+            </button>
+          </div>
         </div>
-        <div *ngIf="course.youtubeLinks.length > 0">
-          <strong>YouTube Links:</strong>
-          <ul>
-            <li *ngFor="let link of course.youtubeLinks">
-              <a [href]="link" target="_blank">{{ link }}</a>
-            </li>
-          </ul>
-        </div>
-        <p><strong>Created At:</strong> {{course.createdAt | date:'medium'}}</p>
       </div>
     </div>
   </div>
-  <button (click)="goBack()">Back to Instructor Page</button>
+  <button class="back-button" (click)="focusedCourseId ? resetFocus() : goBack()" *ngIf="courses.length > 0">
+    {{ focusedCourseId ? 'Back to All Courses' : 'Back to Instructor Page' }}
+  </button>
 </div>

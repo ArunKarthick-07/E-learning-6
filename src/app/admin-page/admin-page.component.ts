@@ -61,8 +61,9 @@ export class AdminPageComponent implements OnInit {
   instructorError: string | null = null;
   instructorUpdateError: string | null = null;
   apiUrl: string = 'http://localhost:3000';
+  expandedCourses: { [key: string]: boolean } = {};
 
-  constructor(private fb: FormBuilder, private http: HttpClient,private router: Router) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.instructorForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -128,7 +129,6 @@ export class AdminPageComponent implements OnInit {
         this.pendingCourses = [];
       }
     });
-    
   }
 
   showCreateInstructor(): void {
@@ -254,6 +254,7 @@ export class AdminPageComponent implements OnInit {
     const instructor = this.instructors.find(i => i._id === instructorId);
     return instructor ? instructor.name : 'Unknown';
   }
+
   logout(): void {
     localStorage.removeItem('userId');
     localStorage.removeItem('userName');
@@ -264,5 +265,21 @@ export class AdminPageComponent implements OnInit {
     console.log('Admin logged out');
     this.router.navigate(['/']);
   }
-  
+
+  toggleCourseDetails(courseId: string): void {
+    // If the course is already expanded, collapse it
+    if (this.expandedCourses[courseId]) {
+      this.expandedCourses[courseId] = false;
+    } else {
+      // Collapse all other courses and expand the selected one
+      Object.keys(this.expandedCourses).forEach(key => {
+        this.expandedCourses[key] = false;
+      });
+      this.expandedCourses[courseId] = true;
+    }
+  }
+
+  isAnyCourseExpanded(): boolean {
+    return Object.values(this.expandedCourses).includes(true);
+  }
 }

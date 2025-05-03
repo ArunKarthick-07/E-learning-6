@@ -1,9 +1,55 @@
+/* Global box-sizing to prevent padding/border issues */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reset default margins and paddings */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Page Container with Background Image */
+.page-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('/assets/1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Add a semi-transparent overlay to the entire page for readability */
+.page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 0;
+}
+
+/* Ensure the register container is above the overlay */
+.page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Register Container */
 .register-container {
-  max-width: 450px;
-  margin: 60px auto;
-  padding: 30px;
-  background: linear-gradient(135deg, rgba(230, 240, 250, 0.9), rgba(240, 247, 255, 0.9)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
-  border-radius: 12px;
+  max-width: 550px; /* Increased from 450px to match User Login */
+  width: 90%;
+  margin: 0; /* Centering handled by .page-container */
+  padding: 40px; /* Increased from 30px */
+  background: linear-gradient(135deg, rgba(230, 240, 250, 0.95), rgba(240, 247, 255, 0.95));
+  border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 50, 100, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -13,35 +59,43 @@
   box-shadow: 0 12px 32px rgba(0, 50, 100, 0.2);
 }
 
+/* Heading */
 h2 {
   text-align: center;
   color: #1e3a8a;
-  margin-bottom: 30px;
-  font-size: 28px;
+  margin-bottom: 35px; /* Increased from 30px */
+  font-size: 32px; /* Increased from 28px */
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 
+/* Form Group */
 div {
-  margin-bottom: 20px;
+  margin-bottom: 25px; /* Increased from 20px */
 }
 
+/* Labels */
 label {
   display: block;
   margin-bottom: 8px;
   color: #2c5282;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px; /* Increased from 14px */
 }
 
+/* Inputs */
 input {
   width: 100%;
-  padding: 12px;
+  padding: 14px; /* Increased from 12px */
   border: 1px solid #90cdf4;
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 16px; /* Increased from 15px */
   background-color: #ffffff;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+input:hover {
+  background-color: #f9f9f9;
 }
 
 input:focus {
@@ -50,6 +104,7 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
 }
 
+/* Error Messages */
 .text-danger {
   color: #e53e3e;
   font-size: 13px;
@@ -58,33 +113,39 @@ input:focus {
   font-weight: 400;
 }
 
+/* Buttons */
 button {
   width: 100%;
-  padding: 12px;
-  background-color: #3182ce;
+  padding: 14px; /* Increased from 12px */
+  background: linear-gradient(45deg, #3182ce, #63b3ed); /* Updated to gradient */
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 17px; /* Increased from 16px */
   font-weight: 500;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 button:hover:not(:disabled) {
-  background-color: #2b6cb0;
+  background: linear-gradient(45deg, #2b6cb0, #4299e1);
   transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(49, 130, 206, 0.4);
 }
 
 button:disabled {
   background-color: #b0c4de;
   cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
 }
 
+/* Login Link */
 .login-link {
   text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
+  margin-top: 25px; /* Increased from 20px */
+  font-size: 15px; /* Increased from 14px */
   color: #2d3748;
 }
 
@@ -100,6 +161,7 @@ button:disabled {
   text-decoration: underline;
 }
 
+/* File Input */
 input[type="file"] {
   padding: 8px;
   border: none;
@@ -108,18 +170,21 @@ input[type="file"] {
 
 input[type="file"]::file-selector-button {
   padding: 8px 16px;
-  background-color: #3182ce;
+  background: linear-gradient(45deg, #3182ce, #63b3ed); /* Updated to gradient */
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 input[type="file"]::file-selector-button:hover {
-  background-color: #2b6cb0;
+  background: linear-gradient(45deg, #2b6cb0, #4299e1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(49, 130, 206, 0.4);
 }
 
+/* Password Container and Toggle */
 .password-container {
   position: relative;
 }
@@ -139,6 +204,7 @@ input[type="file"]::file-selector-button:hover {
   color: #2b6cb0;
 }
 
+/* Password Requirements */
 .password-requirements {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -175,4 +241,38 @@ input[type="file"]::file-selector-button:hover {
   content: '✖';
   color: #e53e3e;
   margin-right: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .page-container {
+    padding: 20px;
+  }
+
+  .register-container {
+    max-width: 100%;
+    padding: 25px; /* Adjusted for smaller screens */
+  }
+
+  h2 {
+    font-size: 26px; /* Adjusted from 32px */
+  }
+
+  input {
+    font-size: 15px; /* Adjusted from 16px */
+    padding: 12px;
+  }
+
+  button {
+    font-size: 15px; /* Adjusted from 17px */
+    padding: 12px;
+  }
+
+  label {
+    font-size: 14px;
+  }
+
+  .login-link {
+    font-size: 14px;
+  }
 }

@@ -1,17 +1,41 @@
 <div class="user-page-container animate-fade-in">
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-logo">E-LEARNING</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Courses</a>
+      <a href="#">Pages</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="nav-buttons">
+      <button (click)="goToProfile()" class="profile-button">Profile</button>
+      <button (click)="logout()" class="logout-button">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Welcome Section -->
   <h1 class="animate-bounce">Welcome, {{ userName }}</h1>
-  <div class="button-group">
-    <button (click)="logout()" class="logout-button">Logout</button>
-    <button (click)="goToProfile()" class="profile-button">Profile</button>
+
+  <!-- Search Box -->
+  <div class="search-container">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search courses by name..." (input)="filterCourses($event)">
+    </div>
   </div>
 
   <!-- Enrolled Courses -->
   <div class="course-section">
     <h2>Enrolled Courses</h2>
     <div class="course-list">
-      <div *ngFor="let course of enrolledCourses; let i = index" class="course-card animate-slide-in" [style.--delay]="i * 0.2 + 's'">
+      <div *ngFor="let course of filteredEnrolledCourses; let i = index" class="course-card animate-slide-in" [style.--delay]="i * 0.2 + 's'" [ngClass]="{'expanded': showCourseDetails[course.id]}">
         <div class="course-header" (click)="toggleCourseDetails(course.id)">
           <img [src]="course.thumbnail || 'assets/default-thumbnail.jpg'" alt="Course Thumbnail" class="course-thumbnail">
+          <div class="button-group">
+            <button>View Details</button>
+          </div>
           <div class="course-info">
             <h3>{{ course.title }}</h3>
             <p>{{ course.description | slice:0:100 }}{{ course.description.length > 100 ? '...' : '' }}</p>
@@ -19,39 +43,41 @@
           <span class="expand-icon">{{ showCourseDetails[course.id] ? '▼' : '▶' }}</span>
         </div>
         <div *ngIf="showCourseDetails[course.id]" class="course-details-panel">
-          <p><strong>Description:</strong> {{ course.description }}</p>
-          <p><strong>Contents:</strong> {{ course.contents }}</p>
-          <div class="resources">
-            <ng-container *ngIf="course.pdfs && course.pdfs.length > 0; else noPdf">
-              <h4>PDF Resources</h4>
-              <a *ngFor="let pdf of course.pdfs; let i = index" [href]="pdf" target="_blank" class="resource-link" (click)="$event.stopPropagation()">
-                Download PDF {{ i + 1 }}
-              </a>
-            </ng-container>
-            <ng-template #noPdf><p>No PDF available</p></ng-template>
-            <ng-container *ngIf="(course.youtubeLinks?.length ?? 0) > 0; else noVideo">
-              <h4>Video Resources</h4>
-              <a *ngFor="let link of course.youtubeLinks; let i = index" [href]="link" target="_blank" class="resource-link" (click)="$event.stopPropagation()">
-                Watch Video {{ i + 1 }}
-              </a>
-            </ng-container>
-            <ng-template #noVideo><p>No YouTube link available</p></ng-template>
-          </div>
-          <!-- Assessments Section within the course -->
-          <div class="assessments-section">
-            <h3>Available Assessments</h3>
-            <ng-container *ngIf="assessments.length > 0; else noAssessments">
-              <div *ngFor="let assessment of assessments" class="assessment-item">
-                <p>{{ assessment.title }}</p>
-                <ng-container *ngIf="!hasTakenAssessment(assessment._id); else alreadyTaken">
-                  <button (click)="startAssessment(assessment._id)">Start Assessment</button>
-                </ng-container>
-                <ng-template #alreadyTaken>
-                  <p class="already-taken-message">Only one attempt allowed</p>
-                </ng-template>
-              </div>
-            </ng-container>
-            <ng-template #noAssessments>No assessments available for this course.</ng-template>
+          <div class="details-content">
+            <p><strong>Description:</strong> {{ course.description }}</p>
+            <p><strong>Contents:</strong> {{ course.contents }}</p>
+            <div class="resources">
+              <ng-container *ngIf="course.pdfs && course.pdfs.length > 0; else noPdf">
+                <h4>PDF Resources</h4>
+                <a *ngFor="let pdf of course.pdfs; let i = index" [href]="pdf" target="_blank" class="resource-link" (click)="$event.stopPropagation()">
+                  Download PDF {{ i + 1 }}
+                </a>
+              </ng-container>
+              <ng-template #noPdf><p>No PDF available</p></ng-template>
+              <ng-container *ngIf="(course.youtubeLinks?.length ?? 0) > 0; else noVideo">
+                <h4>Video Resources</h4>
+                <a *ngFor="let link of course.youtubeLinks; let i = index" [href]="link" target="_blank" class="resource-link" (click)="$event.stopPropagation()">
+                  Watch Video {{ i + 1 }}
+                </a>
+              </ng-container>
+              <ng-template #noVideo><p>No YouTube link available</p></ng-template>
+            </div>
+            <!-- Assessments Section within the course -->
+            <div class="assessments-section">
+              <h3>Available Assessments</h3>
+              <ng-container *ngIf="assessments.length > 0; else noAssessments">
+                <div *ngFor="let assessment of assessments" class="assessment-item">
+                  <p>{{ assessment.title }}</p>
+                  <ng-container *ngIf="!hasTakenAssessment(assessment._id); else alreadyTaken">
+                    <button (click)="startAssessment(assessment._id)">Start Assessment</button>
+                  </ng-container>
+                  <ng-template #alreadyTaken>
+                    <p class="already-taken-message">Only one attempt allowed</p>
+                  </ng-template>
+                </div>
+              </ng-container>
+              <ng-template #noAssessments>No assessments available for this course.</ng-template>
+            </div>
           </div>
         </div>
       </div>
@@ -61,17 +87,20 @@
   <!-- Available Courses -->
   <div class="course-section">
     <h2>Available Courses</h2>
-    <div *ngIf="availableCourses.length === 0" class="no-courses">
+    <div *ngIf="filteredAvailableCourses.length === 0" class="no-courses">
       <p>No available courses found. Check back later!</p>
     </div>
     <div class="course-list">
-      <div *ngFor="let course of availableCourses; let i = index" class="course-card animate-slide-in" [style.--delay]="i * 0.2 + 's'">
+      <div *ngFor="let course of filteredAvailableCourses; let i = index" class="course-card animate-slide-in" [style.--delay]="i * 0.2 + 's'">
         <img [src]="course.thumbnail || 'assets/default-thumbnail.jpg'" alt="Course Thumbnail" class="course-thumbnail">
-        <h3>{{ course.title }}</h3>
-        <p>{{ course.description }}</p>
-        <p><strong>Contents:</strong> {{ course.contents }}</p>
-        <p><strong>Price:</strong> ${{ course.price }}</p>
-        <button (click)="initiateEnrollment(course)">Enroll</button>
+        <div class="button-group">
+          <button (click)="initiateEnrollment(course)">Enroll Now</button>
+        </div>
+        <div class="course-info">
+          <div class="price">Rs.{{ course.price }}</div>
+          <h3>{{ course.title }}</h3>
+          <p>{{ course.description | slice:0:100 }}{{ course.description.length > 100 ? '...' : '' }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -105,46 +134,49 @@
       <p>No past marks available.</p>
     </ng-template>
   </div>
+</div>
 
-  <!-- Payment Modal -->
-  <div *ngIf="showPaymentModal" class="modal-overlay animate-modal-fade-in">
-    <div class="modal-content">
-      <h2>Payment for {{ selectedCourseForPayment?.title }}</h2>
-      <p>Price: ${{ selectedCourseForPayment?.price }}</p>
-      <form>
-        <label>Card Number:</label>
-        <input type="text" [(ngModel)]="paymentDetails.cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456">
-        <label>Expiry Date:</label>
-        <input type="text" [(ngModel)]="paymentDetails.expiryDate" name="expiryDate" placeholder="MM/YY">
-        <label>CVV:</label>
-        <input type="text" [(ngModel)]="paymentDetails.cvv" name="cvv" placeholder="123">
-        <p class="error" *ngIf="paymentError">{{ paymentError }}</p>
-      </form>
-      <div class="modal-buttons">
-        <button (click)="confirmPayment()">Pay Now</button>
-        <button (click)="cancelPayment()">Cancel</button>
-      </div>
+<!-- Payment Modal (Moved outside user-page-container) -->
+<div *ngIf="showPaymentModal" class="modal-overlay animate-modal-fade-in">
+  <div class="payment-modal-content">
+    <h2>Payment for {{ selectedCourseForPayment?.title }}</h2>
+    <p>Price: Rs.{{ selectedCourseForPayment?.price }}</p>
+    <form>
+      <label>Card Number:</label>
+      <input type="text" [(ngModel)]="paymentDetails.cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456">
+      <label>Expiry Date:</label>
+      <input type="text" [(ngModel)]="paymentDetails.expiryDate" name="expiryDate" placeholder="MM/YY">
+      <label>CVV:</label>
+      <input type="text" [(ngModel)]="paymentDetails.cvv" name="cvv" placeholder="123">
+      <p class="error" *ngIf="paymentError">{{ paymentError }}</p>
+    </form>
+    <div class="modal-buttons">
+      <button (click)="confirmPayment()">Pay Now</button>
+      <button (click)="cancelPayment()">Cancel</button>
     </div>
   </div>
+</div>
 
-  <!-- Review Modal -->
-  <div *ngIf="showReviewModal" class="modal-overlay animate-modal-fade-in">
-    <div class="modal-content">
-      <h2>Review: {{ getAssessmentTitle() }}</h2>
-      <div *ngFor="let question of getAssessmentQuestions(); let qIndex = index">
-        <p><strong>Question {{ qIndex + 1 }}:</strong> {{ question.text }}</p>
-        <p>Options:</p>
-        <ul>
-          <li *ngFor="let option of question.options; let i = index">
-            {{ option }}
-            <span *ngIf="i === question.correctAnswer"> (Correct)</span>
-            <span *ngIf="getUserAnswer(qIndex) === i"> (Your Answer)</span>
-          </li>
-        </ul>
-      </div>
-      <div class="modal-buttons">
-        <button (click)="closeReviewModal()">Close</button>
-      </div>
+<!-- Review Modal (Moved outside user-page-container) -->
+<div *ngIf="showReviewModal" class="modal-overlay animate-modal-fade-in">
+  <div class="modal-content">
+    <h2>Review: {{ getAssessmentTitle() }}</h2>
+    <div *ngFor="let question of getAssessmentQuestions(); let qIndex = index" class="review-question">
+      <p><strong>Question {{ qIndex + 1 }}:</strong> {{ question.text }}</p>
+      <p class="options-label">Options:</p>
+      <ul class="options-list">
+        <li *ngFor="let option of question.options; let i = index">
+          {{ i + 1 }}. {{ option }}
+          <span *ngIf="i === (question.correctAnswer - 1)" class="correct-answer"> (Correct)</span>
+          <span *ngIf="getUserAnswer(qIndex) === i" class="user-answer"> (Your Answer)</span>
+          <span *ngIf="getUserAnswer(qIndex) === undefined && i === question.options.length - 1" class="no-answer">
+            (No answer selected for this question)
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="modal-buttons">
+      <button (click)="closeReviewModal()">Close</button>
     </div>
   </div>
 </div>

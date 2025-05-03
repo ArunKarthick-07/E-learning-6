@@ -1,127 +1,137 @@
-<div class="create-assessment-container">
-  <h2>Create Assessment</h2>
-  <form (ngSubmit)="onSubmit(assessmentForm)" #assessmentForm="ngForm">
-    <div class="form-group">
-      <label for="title">Assessment Title:</label>
-      <input
-        type="text"
-        id="title"
-        name="title"
-        [(ngModel)]="assessment.title"
-        required
-        class="form-control"
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="courseId">Select Course:</label>
-      <select
-        id="courseId"
-        name="courseId"
-        [(ngModel)]="selectedCourseId"
-        required
-        class="form-control"
-        *ngIf="!loading && courses.length > 0"
-      >
-        <option *ngFor="let course of courses" [value]="course._id">
-          {{ course.title }}
-        </option>
-      </select>
-      <p *ngIf="loading" class="loading-message">Loading courses...</p>
-      <p *ngIf="!loading && courses.length === 0" class="error-message">
-        No courses available. Create a course first.
-      </p>
-    </div>
-
-    <div class="form-group">
-      <label for="timeLimit">Time Limit (minutes):</label>
-      <input
-        type="number"
-        id="timeLimit"
-        name="timeLimit"
-        [(ngModel)]="assessment.timeLimit"
-        min="1"
-        required
-        class="form-control"
-      />
-    </div>
-
-    <div class="questions-section" *ngFor="let question of assessment.questions; let i = index; trackBy: trackByQuestion">
-      <h3>Question {{ i + 1 }}</h3>
+<div class="page-container">
+  <div class="create-assessment-container">
+    <h2>Create Assessment</h2>
+    <form (ngSubmit)="onSubmit(assessmentForm)" #assessmentForm="ngForm">
       <div class="form-group">
-        <label [for]="'question' + i">Question Text:</label>
-        <textarea
-          [id]="'question' + i"
-          [name]="'question' + i"
-          [(ngModel)]="assessment.questions[i].text"
-          required
-          class="form-control"
-        ></textarea>
-      </div>
-
-      <div class="form-group" *ngFor="let option of question.options; let j = index; trackBy: trackByOption">
-        <label [for]="'option' + i + j">Option {{ j + 1 }}:</label>
+        <label for="title">Assessment Title:</label>
         <input
           type="text"
-          [id]="'option' + i + j"
-          [name]="'option' + i + j"
-          [(ngModel)]="question.options[j]"
-          (ngModelChange)="onOptionChange(i, j)"
+          id="title"
+          name="title"
+          [(ngModel)]="assessment.title"
           required
           class="form-control"
+          placeholder="Enter assessment title"
         />
       </div>
 
       <div class="form-group">
-        <label [for]="'correctAnswer' + i">Correct Answer (1-4):</label>
-        <input
-          type="number"
-          [id]="'correctAnswer' + i"
-          [name]="'correctAnswer' + i"
-          [(ngModel)]="assessment.questions[i].correctAnswer"
-          min="1"
-          max="4"
+        <label for="courseId">Select Course:</label>
+        <select
+          id="courseId"
+          name="courseId"
+          [(ngModel)]="selectedCourseId"
           required
           class="form-control"
-        />
+          *ngIf="!loading && courses.length > 0"
+        >
+          <option *ngFor="let course of courses" [value]="course._id">
+            {{ course.title }}
+          </option>
+        </select>
+        <p *ngIf="loading" class="loading-message">Loading courses...</p>
+        <p *ngIf="!loading && courses.length === 0" class="error-message">
+          No courses available. Create a course first.
+        </p>
       </div>
 
       <div class="form-group">
-        <label [for]="'marks' + i">Marks:</label>
+        <label for="timeLimit">Time Limit (minutes):</label>
         <input
           type="number"
-          [id]="'marks' + i"
-          [name]="'marks' + i"
-          [(ngModel)]="assessment.questions[i].marks"
+          id="timeLimit"
+          name="timeLimit"
+          [(ngModel)]="assessment.timeLimit"
           min="1"
           required
           class="form-control"
+          placeholder="Enter time limit"
         />
       </div>
 
-      <button
-        type="button"
-        (click)="removeQuestion(i)"
-        class="remove-button"
-        *ngIf="assessment.questions.length > 1"
-      >
-        Remove Question
-      </button>
-    </div>
+      <div class="questions-section" *ngFor="let question of assessment.questions; let i = index; trackBy: trackByQuestion">
+        <h3>Question {{ i + 1 }}</h3>
+        <div class="form-group">
+          <label [for]="'question' + i">Question Text:</label>
+          <textarea
+            [id]="'question' + i"
+            [name]="'question' + i"
+            [(ngModel)]="assessment.questions[i].text"
+            required
+            class="form-control"
+            placeholder="Enter question text"
+            rows="3"
+          ></textarea>
+        </div>
 
-    <button type="button" (click)="addQuestion()" class="add-button">
-      Add Question
-    </button>
+        <div class="form-group" *ngFor="let option of question.options; let j = index; trackBy: trackByOption">
+          <label [for]="'option' + i + j">Option {{ j + 1 }}:</label>
+          <input
+            type="text"
+            [id]="'option' + i + j"
+            [name]="'option' + i + j"
+            [(ngModel)]="question.options[j]"
+            (ngModelChange)="onOptionChange(i, j)"
+            required
+            class="form-control"
+            [placeholder]="'Enter option ' + (j + 1)"
+          />
+        </div>
 
-    <button
-      type="submit"
-      class="submit-button"
-      [disabled]="!assessmentForm.valid"
-    >
-      Create Assessment
-    </button>
-    <button type="button" (click)="goBack()" class="back-button">
-      Back to Instructor Page
-    </button>
-  </form>
+        <div class="form-group">
+          <label [for]="'correctAnswer' + i">Correct Answer (1-4):</label>
+          <input
+            type="number"
+            [id]="'correctAnswer' + i"
+            [name]="'correctAnswer' + i"
+            [(ngModel)]="assessment.questions[i].correctAnswer"
+            min="1"
+            max="4"
+            required
+            class="form-control"
+            placeholder="Enter correct answer (1-4)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label [for]="'marks' + i">Marks:</label>
+          <input
+            type="number"
+            [id]="'marks' + i"
+            [name]="'marks' + i"
+            [(ngModel)]="assessment.questions[i].marks"
+            min="1"
+            required
+            class="form-control"
+            placeholder="Enter marks"
+          />
+        </div>
+
+        <button
+          type="button"
+          (click)="removeQuestion(i)"
+          class="remove-button"
+          *ngIf="assessment.questions.length > 1"
+        >
+          Remove Question
+        </button>
+      </div>
+
+      <div class="button-group">
+        <button type="button" (click)="addQuestion()" class="add-button">
+          Add Question
+        </button>
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="!assessmentForm.valid"
+        >
+          Create Assessment
+        </button>
+        <button type="button" (click)="goBack()" class="back-button">
+          Back to Instructor Page
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

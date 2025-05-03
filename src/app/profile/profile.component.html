@@ -16,7 +16,7 @@
       <p><strong>Mobile:</strong> {{ user.mobile || 'Not provided' }}</p>
       <p><strong>Age:</strong> {{ user.age || 'Not provided' }}</p>
       <p><strong>Password:</strong> ********</p>
-      <button (click)="toggleEditMode()" class="edit-button">Edit</button>
+      <button (click)="toggleEditMode()" class="edit-button action-button">Edit</button>
     </div>
 
     <form *ngIf="isEditMode" #profileForm="ngForm" (ngSubmit)="saveProfile()">
@@ -46,8 +46,8 @@
       </div>
       <div *ngIf="passwordError" class="error-message">{{ passwordError }}</div>
       <div class="button-group">
-        <button type="submit" [disabled]="!profileForm.valid">Save</button>
-        <button type="button" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" [disabled]="!profileForm.valid" class="action-button save">Save</button>
+        <button type="button" (click)="cancelEdit()" class="action-button cancel">Cancel</button>
       </div>
     </form>
   </div>

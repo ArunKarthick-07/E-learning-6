@@ -1,38 +1,40 @@
-<div class="login-container">
-  <h2>Admin Login</h2>
-  <form #adminForm="ngForm" (ngSubmit)="onSubmit(adminForm)">
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input
-        type="text"
-        id="username"
-        [(ngModel)]="username"
-        name="username"
-        #usernameControl="ngModel"
-        required
-        class="form-control"
-        placeholder="Enter your username"
-      />
-      <span class="text-danger" *ngIf="usernameControl?.touched && usernameControl?.errors?.['required']">
-        Username is required.
-      </span>
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input
-        type="password"
-        id="password"
-        [(ngModel)]="password"
-        name="password"
-        #passwordControl="ngModel"
-        required
-        class="form-control"
-        placeholder="Enter your password"
-      />
-      <span class="text-danger" *ngIf="passwordControl?.touched && passwordControl?.errors?.['required']">
-        Password is required.
-      </span>
-    </div>
-    <button type="submit" class="btn btn-primary" [disabled]="!adminForm.valid">Login</button>
-  </form>
+<div class="page-container">
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <form #adminForm="ngForm" (ngSubmit)="onSubmit(adminForm)">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          #usernameControl="ngModel"
+          required
+          class="form-control"
+          placeholder="Enter your username"
+        />
+        <span class="text-danger" *ngIf="usernameControl?.touched && usernameControl?.errors?.['required']">
+          Username is required.
+        </span>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          #passwordControl="ngModel"
+          required
+          class="form-control"
+          placeholder="Enter your password"
+        />
+        <span class="text-danger" *ngIf="passwordControl?.touched && passwordControl?.errors?.['required']">
+          Password is required.
+        </span>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="!adminForm.valid">Login</button>
+    </form>
+  </div>
 </div>

@@ -1,0 +1,43 @@
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error" class="error">{{ error }}</div>
+<div *ngIf="assessment">
+  <h2>Edit Assessment: {{ assessment.title }}</h2>
+  <form (ngSubmit)="updateAssessment()" #assessmentForm="ngForm">
+    <div class="form-group">
+      <label for="title">Title:</label>
+      <input id="title" [(ngModel)]="assessment.title" name="title" required />
+    </div>
+    <div class="form-group">
+      <label for="timeLimit">Time Limit (minutes):</label>
+      <input id="timeLimit" type="number" [(ngModel)]="assessment.timeLimit" name="timeLimit" required min="1" />
+    </div>
+    <div class="question-section" *ngFor="let question of assessment.questions; let i = index; trackBy: trackByIndex">
+      <div class="question-header">
+        <label>Question {{ i + 1 }}:</label>
+        <button type="button" class="remove-button" (click)="removeQuestion(i)" *ngIf="assessment.questions.length > 1">Remove</button>
+      </div>
+      <input [(ngModel)]="question.text" name="questionText{{i}}" placeholder="Question Text" required />
+      <div class="options">
+        <div *ngFor="let option of question.options; let j = index; trackBy: trackByIndex">
+          <label>Option {{ j + 1 }}:</label>
+          <input [(ngModel)]="question.options[j]" name="option{{i}}{{j}}" required placeholder="Enter option (e.g., Arun Karthick)" class="option-input" (focus)="onFocus(i, j)" (blur)="onBlur(i, j)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Correct Answer:</label>
+        <select [(ngModel)]="question.correctAnswer" name="correctAnswer{{i}}" required>
+          <option *ngFor="let opt of [1, 2, 3, 4]; let k = index; trackBy: trackByIndex" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Marks:</label>
+        <input type="number" [(ngModel)]="question.marks" name="marks{{i}}" required min="1" />
+      </div>
+    </div>
+    <button type="button" (click)="addQuestion()" class="add-button">Add Question</button>
+    <div class="form-actions">
+      <button type="submit" [disabled]="loading || assessmentForm.invalid">Update Assessment</button>
+      <button type="button" (click)="goBack()">Cancel</button>
+    </div>
+  </form>
+</div>

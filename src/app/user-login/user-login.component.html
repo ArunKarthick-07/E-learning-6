@@ -1,108 +1,110 @@
-<div class="login-container">
-  <h2 *ngIf="!showResetForm">User Login</h2>
-  <h2 *ngIf="showResetForm">Reset Password</h2>
+<div class="page-container">
+  <div class="login-container">
+    <h2 *ngIf="!showResetForm">User Login</h2>
+    <h2 *ngIf="showResetForm">Reset Password</h2>
 
-  <!-- Login Form -->
-  <form *ngIf="!showResetForm" #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
-    <div>
-      <label for="email">Email</label>
-      <input
-        type="email"
-        id="email"
-        [(ngModel)]="email"
-        name="email"
-        #emailControl="ngModel"
-        required
-        pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
-      />
-      <span class="text-danger" *ngIf="emailControl?.touched && emailControl?.errors?.['required']">
-        Email is required.
-      </span>
-      <span class="text-danger" *ngIf="emailControl?.touched && emailControl?.errors?.['pattern']">
-        Please enter a valid Gmail address.
-      </span>
-    </div>
-    <div>
-      <label for="password">Password</label>
-      <input
-        type="password"
-        id="password"
-        [(ngModel)]="password"
-        name="password"
-        #passwordControl="ngModel"
-        required
-      />
-      <span class="text-danger" *ngIf="passwordControl?.touched && passwordControl?.errors?.['required']">
-        Password is required.
-      </span>
-    </div>
-    <button type="submit" [disabled]="!loginForm.valid">Login</button>
-    <p class="forgot-password">
-      <a (click)="toggleResetForm()">Forgot Password?</a>
+    <!-- Login Form -->
+    <form *ngIf="!showResetForm" #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+      <div>
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          #emailControl="ngModel"
+          required
+          pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+        />
+        <span class="text-danger" *ngIf="emailControl?.touched && emailControl?.errors?.['required']">
+          Email is required.
+        </span>
+        <span class="text-danger" *ngIf="emailControl?.touched && emailControl?.errors?.['pattern']">
+          Please enter a valid Gmail address.
+        </span>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          #passwordControl="ngModel"
+          required
+        />
+        <span class="text-danger" *ngIf="passwordControl?.touched && passwordControl?.errors?.['required']">
+          Password is required.
+        </span>
+      </div>
+      <button type="submit" [disabled]="!loginForm.valid">Login</button>
+      <p class="forgot-password">
+        <a (click)="toggleResetForm()">Forgot Password?</a>
+      </p>
+    </form>
+
+    <!-- Reset Password Form -->
+    <form *ngIf="showResetForm" #resetForm="ngForm" (ngSubmit)="onResetPassword(resetForm)">
+      <div>
+        <label for="resetEmail">Email</label>
+        <input
+          type="email"
+          id="resetEmail"
+          [(ngModel)]="resetEmail"
+          name="resetEmail"
+          #resetEmailControl="ngModel"
+          required
+          pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+        />
+        <span class="text-danger" *ngIf="resetEmailControl?.touched && resetEmailControl?.errors?.['required']">
+          Email is required.
+        </span>
+        <span class="text-danger" *ngIf="resetEmailControl?.touched && resetEmailControl?.errors?.['pattern']">
+          Please enter a valid Gmail address.
+        </span>
+      </div>
+      <div>
+        <label for="newPassword">New Password</label>
+        <input
+          type="password"
+          id="newPassword"
+          [(ngModel)]="newPassword"
+          name="newPassword"
+          #newPasswordControl="ngModel"
+          required
+        />
+        <span class="text-danger" *ngIf="newPasswordControl?.touched && newPasswordControl?.errors?.['required']">
+          New password is required.
+        </span>
+      </div>
+      <div>
+        <label for="reenterPassword">Re-enter New Password</label>
+        <input
+          type="password"
+          id="reenterPassword"
+          [(ngModel)]="reenterPassword"
+          name="reenterPassword"
+          #reenterPasswordControl="ngModel"
+          required
+        />
+        <span class="text-danger" *ngIf="reenterPasswordControl?.touched && reenterPasswordControl?.errors?.['required']">
+          Please re-enter your new password.
+        </span>
+      </div>
+      <div *ngIf="passwordError" class="text-danger">
+        {{ passwordError }}
+      </div>
+      <div *ngIf="resetSuccessMessage" class="text-success">
+        {{ resetSuccessMessage }}
+      </div>
+      <button type="submit" [disabled]="!resetForm.valid">Reset Password</button>
+      <p class="back-to-login">
+        <a (click)="toggleResetForm()">Back to Login</a>
+      </p>
+    </form>
+
+    <p *ngIf="!showResetForm" class="register-link">
+      Don't have an account? <a (click)="navigateToRegister()">Register here</a>
     </p>
-  </form>
-
-  <!-- Reset Password Form -->
-  <form *ngIf="showResetForm" #resetForm="ngForm" (ngSubmit)="onResetPassword(resetForm)">
-    <div>
-      <label for="resetEmail">Email</label>
-      <input
-        type="email"
-        id="resetEmail"
-        [(ngModel)]="resetEmail"
-        name="resetEmail"
-        #resetEmailControl="ngModel"
-        required
-        pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
-      />
-      <span class="text-danger" *ngIf="resetEmailControl?.touched && resetEmailControl?.errors?.['required']">
-        Email is required.
-      </span>
-      <span class="text-danger" *ngIf="resetEmailControl?.touched && resetEmailControl?.errors?.['pattern']">
-        Please enter a valid Gmail address.
-      </span>
-    </div>
-    <div>
-      <label for="newPassword">New Password</label>
-      <input
-        type="password"
-        id="newPassword"
-        [(ngModel)]="newPassword"
-        name="newPassword"
-        #newPasswordControl="ngModel"
-        required
-      />
-      <span class="text-danger" *ngIf="newPasswordControl?.touched && newPasswordControl?.errors?.['required']">
-        New password is required.
-      </span>
-    </div>
-    <div>
-      <label for="reenterPassword">Re-enter New Password</label>
-      <input
-        type="password"
-        id="reenterPassword"
-        [(ngModel)]="reenterPassword"
-        name="reenterPassword"
-        #reenterPasswordControl="ngModel"
-        required
-      />
-      <span class="text-danger" *ngIf="reenterPasswordControl?.touched && reenterPasswordControl?.errors?.['required']">
-        Please re-enter your new password.
-      </span>
-    </div>
-    <div *ngIf="passwordError" class="text-danger">
-      {{ passwordError }}
-    </div>
-    <div *ngIf="resetSuccessMessage" class="text-success">
-      {{ resetSuccessMessage }}
-    </div>
-    <button type="submit" [disabled]="!resetForm.valid">Reset Password</button>
-    <p class="back-to-login">
-      <a (click)="toggleResetForm()">Back to Login</a>
-    </p>
-  </form>
-
-  <p *ngIf="!showResetForm" class="register-link">
-    Don't have an account? <a (click)="navigateToRegister()">Register here</a>
-  </p>
+  </div>
 </div>

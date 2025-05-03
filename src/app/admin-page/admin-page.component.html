@@ -1,91 +1,138 @@
 <div class="dashboard-container">
-  <h2>Admin Dashboard</h2>
+  <h2 class="dashboard-title">Admin Dashboard</h2>
 
   <div class="toggle-buttons">
-    <button (click)="showCreateInstructor()" class="toggle-button" [class.active]="currentView === 'createInstructor'">Create Instructor</button>
-    <button (click)="showViewCourses()" class="toggle-button" [class.active]="currentView === 'viewCourses'">View Courses</button>
-    <button (click)="showPendingCourses()" class="toggle-button" [class.active]="currentView === 'pendingCourses'">Pending Courses</button>
-    <button (click)="showManageInstructors()" class="toggle-button" [class.active]="currentView === 'manageInstructors'">Manage Instructors</button>
+    <button
+      (click)="showCreateInstructor()"
+      class="toggle-button"
+      [class.active]="currentView === 'createInstructor'"
+    >
+      <span class="icon">👤</span>Create Instructor
+    </button>
+    <button
+      (click)="showViewCourses()"
+      class="toggle-button"
+      [class.active]="currentView === 'viewCourses'"
+    >
+      <span class="icon">📚</span>View Courses
+    </button>
+    <button
+      (click)="showPendingCourses()"
+      class="toggle-button"
+      [class.active]="currentView === 'pendingCourses'"
+    >
+      <span class="icon">⏳</span>Pending Courses
+    </button>
+    <button
+      (click)="showManageInstructors()"
+      class="toggle-button"
+      [class.active]="currentView === 'manageInstructors'"
+    >
+      <span class="icon">🛠️</span>Manage Instructors
+    </button>
   </div>
 
   @if (currentView === 'viewCourses') {
     <div class="card mb-8">
-      <h3>All Courses</h3>
+      <h3 class="card-title">All Courses</h3>
       @if (instructorError) {
-        <p class="error">{{ instructorError }}</p>
+        <p class="error"><span class="error-icon">⚠️</span>{{ instructorError }}</p>
       }
       @if (courses.length === 0 && !instructorError) {
-        <p class="placeholder-text">No courses available.</p>
+        <p class="placeholder-text"><span class="empty-icon">📚</span>No courses available.</p>
       } @else {
-        <table class="table expandable-table">
-          <thead>
-            <tr class="table-header">
-              <th>Course Name</th>
-              <th>Instructor</th>
-              <th>Description</th>
-              <th>Content</th>
-              <th>PDFs</th>
-              <th>YouTube Links</th>
-              <th>Price</th>
-              <th>Enrolled Users</th>
-              <th>Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (course of courses; track course._id) {
-              <tr class="table-row">
-                <td class="expandable-cell">{{ course.name }}</td>
-                <td class="expandable-cell">{{ getInstructorName(course.instructorId) }}</td>
-                <td class="expandable-cell">{{ course.description }}</td>
-                <td class="expandable-cell">{{ course.contents }}</td>
-                <td class="expandable-cell">
-                  @if (course.pdfs.length > 0) {
-                    <ul>
-                      @for (pdf of course.pdfs; track pdf) {
-                        <li><a [href]="apiUrl + pdf" target="_blank">{{ pdf.split('/').pop() }}</a></li>
+        <div class="course-grid">
+          @for (course of courses; track course._id) {
+            <div class="course-card" 
+                 [ngClass]="{'expanded': expandedCourses[course._id]}" 
+                 *ngIf="!isAnyCourseExpanded() || expandedCourses[course._id]">
+              <div class="course-header">
+                @if (course.thumbnail) {
+                  <img class="course-thumbnail" [src]="apiUrl + course.thumbnail" alt="Course Thumbnail">
+                }
+                <div class="course-info">
+                  <h3>{{ course.name }}</h3>
+                  <p>Instructor: {{ getInstructorName(course.instructorId) }}</p>
+                </div>
+                <span class="expand-icon" (click)="toggleCourseDetails(course._id)">
+                  {{ expandedCourses[course._id] ? '⬇️' : '⬆️' }}
+                </span>
+              </div>
+              @if (expandedCourses[course._id]) {
+                <div class="course-details-panel">
+                  <div class="details-content">
+                    <h4>Course Details</h4>
+                    <strong>Description</strong>
+                    <p>{{ course.description }}</p>
+                    <strong>Content</strong>
+                    <p>{{ course.contents }}</p>
+                    <strong>Price</strong>
+                    <p class="price">Rs.{{ course.price.toFixed(2) }}</p>
+                    <div class="resources">
+                      @if (course.pdfs.length > 0) {
+                        <div class="resource-section">
+                          <strong>PDFs</strong>
+                          <ul>
+                            @for (pdf of course.pdfs; track pdf; let i = $index) {
+                              <li>
+                                <a [href]="apiUrl + pdf" target="_blank" class="resource-link">
+                                  <span class="pdf-icon">📄</span>PDF{{ i + 1 }}
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        </div>
+                      } @else {
+                        <strong>PDFs</strong>
+                        <p>No PDFs</p>
                       }
-                    </ul>
-                  } @else {
-                    <span>No PDFs</span>
-                  }
-                </td>
-                <td class="expandable-cell">
-                  @if (course.youtubeLinks.length > 0) {
-                    <ul>
-                      @for (link of course.youtubeLinks; track link) {
-                        <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                      @if (course.youtubeLinks.length > 0) {
+                        <div class="resource-section">
+                          <strong>YouTube Links</strong>
+                          <ul>
+                            @for (link of course.youtubeLinks; track link; let i = $index) {
+                              <li>
+                                <a [href]="link" target="_blank" class="resource-link">
+                                  <span class="youtube-icon">▶️</span>YouTube{{ i + 1 }}
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        </div>
+                      } @else {
+                        <strong>YouTube Links</strong>
+                        <p>No YouTube Links</p>
                       }
-                    </ul>
-                  } @else {
-                    <span>No YouTube Links</span>
-                  }
-                </td>
-                <td class="expandable-cell">${{ course.price.toFixed(2) }}</td>
-                <td class="expandable-cell">
-                  @if (course.enrolledUsers && course.enrolledUsers.length > 0) {
-                    <ul>
-                      @for (user of course.enrolledUsers; track user.id) {
-                        <li>{{ user.name }} ({{ user.email }})</li>
+                    </div>
+                    <strong>Created At</strong>
+                    <p>{{ course.createdAt | date:'medium' }}</p>
+                    <div class="enrolled-users">
+                      @if (course.enrolledUsers && course.enrolledUsers.length > 0) {
+                        <strong>Enrolled Users</strong>
+                        <ul>
+                          @for (user of course.enrolledUsers; track user.id) {
+                            <li>{{ user.name }} ({{ user.email }})</li>
+                          }
+                        </ul>
+                      } @else {
+                        <strong>Enrolled Users</strong>
+                        <p>No enrolled users</p>
                       }
-                    </ul>
-                  } @else {
-                    <span>No enrolled users</span>
-                  }
-                </td>
-                <td class="expandable-cell">{{ course.createdAt | date:'medium' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }
     </div>
   }
 
-  <!-- Other sections (createInstructor, pendingCourses, manageInstructors) remain unchanged -->
   @if (currentView === 'createInstructor') {
     <div class="card">
-      <h3>Create Instructor</h3>
-      <form [formGroup]="instructorForm" (ngSubmit)="onInstructorSubmit()">
+      <h3 class="card-title">Create Instructor</h3>
+      <form [formGroup]="instructorForm" (ngSubmit)="onInstructorSubmit()" class="form">
         <div class="form-group">
           <label for="username">Username:</label>
           <input type="text" id="username" formControlName="username" placeholder="Enter username" />
@@ -106,120 +153,142 @@
           <label for="password">Password:</label>
           <input type="password" id="password" formControlName="password" placeholder="Enter password" />
         </div>
-        <button type="submit" [disabled]="instructorForm.invalid">Create Instructor</button>
+        <button type="submit" [disabled]="instructorForm.invalid" class="submit-button">
+          Create Instructor
+        </button>
       </form>
       @if (instructorCreated) {
-        <p class="success">Instructor created successfully!</p>
+        <p class="success"><span class="success-icon">✅</span>Instructor created successfully!</p>
       }
       @if (instructorError) {
-        <p class="error">{{ instructorError }}</p>
+        <p class="error"><span class="error-icon">⚠️</span>{{ instructorError }}</p>
       }
     </div>
   }
 
   @if (currentView === 'pendingCourses') {
     <div class="card mb-8">
-      <h3>Pending Courses</h3>
+      <h3 class="card-title">Pending Courses</h3>
       @if (pendingCourses.length === 0) {
-        <p class="placeholder-text">No pending courses.</p>
+        <p class="placeholder-text"><span class="empty-icon">📚</span>No pending courses.</p>
       } @else {
-        <table class="table">
-          <thead>
-            <tr class="table-header">
-              <th>Course Name</th>
-              <th>Instructor</th>
-              <th>Description</th>
-              <th>Content</th>
-              <th>PDFs</th>
-              <th>YouTube Links</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (pendingCourse of pendingCourses; track pendingCourse._id) {
-              <tr class="table-row">
-                <td>{{ pendingCourse.name }}</td>
-                <td>{{ getInstructorName(pendingCourse.instructorId) }}</td>
-                <td>{{ pendingCourse.description }}</td>
-                <td>{{ pendingCourse.contents }}</td>
-                <td>
-                  @if (pendingCourse.pdfs.length > 0) {
-                    <ul>
-                      @for (pdf of pendingCourse.pdfs; track pdf) {
-                        <li><a [href]="apiUrl + pdf" target="_blank">{{ pdf.split('/').pop() }}</a></li>
-                      }
-                    </ul>
-                  } @else {
-                    <span>No PDFs</span>
-                  }
-                </td>
-                <td>
-                  @if (pendingCourse.youtubeLinks.length > 0) {
-                    <ul>
-                      @for (link of pendingCourse.youtubeLinks; track link) {
-                        <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
-                      }
-                    </ul>
-                  } @else {
-                    <span>No YouTube Links</span>
-                  }
-                </td>
-                <td>${{ pendingCourse.price.toFixed(2) }}</td>
-                <td>{{ pendingCourse.status }}</td>
-                <td>{{ pendingCourse.createdAt | date:'medium' }}</td>
-                <td>
-                  <button (click)="approveCourse(pendingCourse._id)" class="button approve">Approve</button>
-                  <button (click)="rejectCourse(pendingCourse._id)" class="button reject">Reject</button>
-                </td>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr class="table-header">
+                <th>Course Name</th>
+                <th>Instructor</th>
+                <th>Description</th>
+                <th>Content</th>
+                <th>PDFs</th>
+                <th>YouTube Links</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Actions</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (pendingCourse of pendingCourses; track pendingCourse._id) {
+                <tr class="table-row">
+                  <td>{{ pendingCourse.name }}</td>
+                  <td>{{ getInstructorName(pendingCourse.instructorId) }}</td>
+                  <td>{{ pendingCourse.description }}</td>
+                  <td>{{ pendingCourse.contents }}</td>
+                  <td>
+                    @if (pendingCourse.pdfs.length > 0) {
+                      <ul>
+                        @for (pdf of pendingCourse.pdfs; track pdf; let i = $index) {
+                          <li>
+                            <a [href]="apiUrl + pdf" target="_blank" class="resource-link">
+                              <span class="pdf-icon">📄</span>PDF{{ i + 1 }}
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <span>No PDFs</span>
+                    }
+                  </td>
+                  <td>
+                    @if (pendingCourse.youtubeLinks.length > 0) {
+                      <ul>
+                        @for (link of pendingCourse.youtubeLinks; track link; let i = $index) {
+                          <li>
+                            <a [href]="link" target="_blank" class="resource-link">
+                              <span class="youtube-icon">▶️</span>YouTube{{ i + 1 }}
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <span>No YouTube Links</span>
+                    }
+                  </td>
+                  <td>${{ pendingCourse.price.toFixed(2) }}</td>
+                  <td>{{ pendingCourse.status }}</td>
+                  <td>{{ pendingCourse.createdAt | date:'medium' }}</td>
+                  <td>
+                    <button (click)="approveCourse(pendingCourse._id)" class="button approve">
+                      <span class="action-icon">✔️</span>Approve
+                    </button>
+                    <button (click)="rejectCourse(pendingCourse._id)" class="button reject">
+                      <span class="action-icon">❌</span>Reject
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
   }
 
   @if (currentView === 'manageInstructors') {
     <div class="card mb-8">
-      <h3>Manage Instructors</h3>
+      <h3 class="card-title">Manage Instructors</h3>
       @if (instructors.length === 0) {
-        <p class="placeholder-text">No instructors available.</p>
+        <p class="placeholder-text"><span class="empty-icon">👤</span>No instructors available.</p>
       } @else {
-        <table class="table">
-          <thead>
-            <tr class="table-header">
-              <th>Username</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Mobile</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (instructor of instructors; track instructor._id) {
-              <tr class="table-row">
-                <td>{{ instructor.username }}</td>
-                <td>{{ instructor.name }}</td>
-                <td>{{ instructor.email }}</td>
-                <td>{{ instructor.mobile }}</td>
-                <td>
-                  <button (click)="editInstructor(instructor)" class="button">Edit</button>
-                  <button (click)="deleteInstructor(instructor._id)" class="button">Delete</button>
-                </td>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr class="table-header">
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Actions</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (instructor of instructors; track instructor._id) {
+                <tr class="table-row">
+                  <td>{{ instructor.username }}</td>
+                  <td>{{ instructor.name }}</td>
+                  <td>{{ instructor.email }}</td>
+                  <td>{{ instructor.mobile }}</td>
+                  <td>
+                    <button (click)="editInstructor(instructor)" class="button edit">
+                      <span class="action-icon">✏️</span>Edit
+                    </button>
+                    <button (click)="deleteInstructor(instructor._id)" class="button delete">
+                      <span class="action-icon">🗑️</span>Delete
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
 
     @if (selectedInstructor) {
       <div class="card">
-        <h3>Edit Instructor</h3>
-        <form [formGroup]="editInstructorForm" (ngSubmit)="onEditInstructorSubmit()">
+        <h3 class="card-title">Edit Instructor</h3>
+        <form [formGroup]="editInstructorForm" (ngSubmit)="onEditInstructorSubmit()" class="form">
           <div class="form-group">
             <label for="edit-username">Username:</label>
             <input type="text" id="edit-username" formControlName="username" placeholder="Enter username" />
@@ -240,17 +309,23 @@
             <label for="edit-password">Password:</label>
             <input type="password" id="edit-password" formControlName="password" placeholder="Enter new password" />
           </div>
-          <button type="submit" [disabled]="editInstructorForm.invalid">Update Instructor</button>
-          <button type="button" (click)="cancelEdit()" class="cancel">Cancel</button>
+          <div class="form-actions">
+            <button type="submit" [disabled]="editInstructorForm.invalid" class="submit-button">
+              Update Instructor
+            </button>
+            <button type="button" (click)="cancelEdit()" class="cancel-button">Cancel</button>
+          </div>
         </form>
         @if (instructorUpdated) {
-          <p class="success">Instructor updated successfully!</p>
+          <p class="success"><span class="success-icon">✅</span>Instructor updated successfully!</p>
         }
         @if (instructorUpdateError) {
-          <p class="error">{{ instructorUpdateError }}</p>
+          <p class="error"><span class="error-icon">⚠️</span>{{ instructorUpdateError }}</p>
         }
       </div>
     }
   }
-  <button (click)="logout()" class="logout-button">Logout</button>
+  <button (click)="logout()" class="logout-button">
+    <span class="logout-icon">🚪</span>Logout
+  </button>
 </div>

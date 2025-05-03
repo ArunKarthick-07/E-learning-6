@@ -1,304 +1,657 @@
-/* Ensure the container takes up the full viewport */
-.instructor-home-container {
-  width: 100vw;
-  height: 100vh;
-  margin: 0; /* Remove all margins */
-  padding: 0; /* Remove padding to stretch content */
-  background: linear-gradient(rgba(30, 60, 114, 0.8), rgba(42, 82, 152, 0.8));
-  border: none; /* Remove border to eliminate any gaps */
-  border-radius: 0; /* Remove border radius for full-screen */
-  box-shadow: none; /* Remove shadow for full-screen */
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto; /* Allow scrolling if content overflows */
-  transition: all 0.3s ease;
+/* Global box-sizing to prevent padding/border issues */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* Full-screen mode for course details */
-.instructor-home-container.full-screen {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
+/* Reset default margins and paddings */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Navigation Bar (Same as User Page) */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00C4B4;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #1A3C5A;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.nav-links a:hover {
+  color: #00C4B4;
+}
+
+/* Navigation Buttons (Profile and Logout) */
+.nav-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-buttons .profile-button,
+.nav-buttons .logout-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+/* Main Container (Matching User Page, with increased background visibility) */
+.instructor-page-container {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 40px 30px;
+  background: url('/assets/1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #1A3C5A;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Add a semi-transparent overlay with reduced opacity for better background visibility */
+.instructor-page-container::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
-  z-index: 1000;
-  overflow-y: auto;
-  padding: 20px;
-  margin: 0;
-  border: none;
-  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.65);
+  z-index: 0;
 }
 
-/* Header Section */
+/* Ensure all content is above the overlay */
+.instructor-page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Welcome Heading (Same as User Page) */
+h1 {
+  text-align: center;
+  color: #1A3C5A;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 40px 0;
+  position: relative;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+h1::before,
+h1::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background-color: #00C4B4;
+}
+
+h1::before {
+  left: calc(50% - 120px);
+}
+
+h1::after {
+  right: calc(50% - 120px);
+}
+
+/* Toggle Container for Centering */
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Notifications Toggle Button (Styled like User Page buttons) */
+.toggle-notifications {
+  background: linear-gradient(45deg, #00A8A1, #00C4B4);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 150px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.toggle-notifications:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 196, 180, 0.7);
+}
+
+/* Notifications Section (Adapted from instructor-home, styled like User Page) */
+.notifications-section {
+  padding: 20px;
+  background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+  border: 2px solid #00C4B4;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.notifications-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 15px;
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #00C4B4;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 196, 180, 0.3);
+}
+
+.notification-item.read {
+  background: rgba(176, 190, 197, 0.7);
+  opacity: 0.7;
+}
+
+.notification-item p {
+  margin: 0;
+  color: #1A3C5A;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.notification-date {
+  color: #00C4B4;
+  font-size: 14px;
+}
+
+.mark-read {
+  background: linear-gradient(45deg, #1e90ff, #00b7eb);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mark-read:hover {
+  background: linear-gradient(45deg, #1e7bff, #00a3d9);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(163, 216, 244, 0.7);
+}
+
+.no-notifications {
+  text-align: center;
+  color: #1A3C5A;
+  font-size: 16px;
+  padding: 10px;
+}
+
+/* Header Section (Adapted from instructor-home) */
 .header {
   text-align: center;
   padding: 20px;
-  background: rgba(13, 73, 137, 0.95);
-  border: 1px solid #4ecdc4;
-  border-radius: 8px;
-  margin: 20px; /* Add internal margin for spacing */
-}
-
-h2 {
-  color: rgb(82, 103, 167);
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  background: linear-gradient(45deg, #1e90ff, #00b7eb);
-  padding: 10px;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #0288D1, #01579B);
+  color: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .loading {
-  color: #a3d8f4;
+  color: #FFFFFF;
   font-size: 16px;
 }
 
 .course-count {
-  color: #fff;
+  color: #FFFFFF;
   font-size: 16px;
 }
 
 .course-count strong {
-  color: #4ecdc4;
+  color: #FFCA28;
 }
 
-/* Course Section */
+/* Course Section (Same as User Page) */
 .course-section {
-  flex: 1; /* Allow course section to take remaining space */
-  margin: 20px;
-  padding: 20px;
-  background: rgba(13, 73, 137, 0.95);
-  border: 1px solid #4ecdc4;
-  border-radius: 8px;
-  overflow-y: auto; /* Allow scrolling within course section */
+  margin-bottom: 50px;
 }
 
-.course-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
-}
-
-.course-card {
-  padding: 15px;
-  background-color: #2162a3;
-  border: 2px solid #4ecdc4;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+h2 {
+  color: #a3d8f4;
+  border-bottom: 2px solid #4ecdc4;
+  padding-bottom: 8px;
+  font-size: 28px;
+  text-align: center;
+  margin: 40px 0;
   position: relative;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+h2::before,
+h2::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background-color: #00C4B4;
+}
+
+h2::before {
+  left: calc(50% - 120px);
+}
+
+h2::after {
+  right: calc(50% - 120px);
+}
+
+/* Course List (Same as User Page) */
+.course-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+}
+
+/* Course Card (Same as User Page) */
+.course-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
 }
 
 .course-card:hover, .course-card.selected {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.5);
-  border-color: #4ecdc4;
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .course-thumbnail {
   width: 100%;
-  height: 150px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 8px;
 }
 
 .course-info {
-  margin-top: 10px;
-}
-
-.course-card h3 {
-  margin: 10px 0 5px;
-  font-size: 1.2em;
-  color: #a3d8f4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.course-card p {
-  font-size: 0.9em;
-  color: #fff;
-  margin: 0;
-}
-
-/* Course Details */
-.course-details {
-  margin: 20px;
+  background-color: #E6F7FA;
   padding: 20px;
-  background-color: rgba(13, 73, 137, 0.95);
-  border: 2px solid #4ecdc4;
-  border-radius: 8px;
+  text-align: left;
+}
+
+.course-info h3 {
+  font-size: 18px;
+  color: #1A3C5A;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.course-info p {
+  font-size: 14px;
+  color: #5267A7;
+  margin: 5px 0;
+}
+
+/* Course Details (Unchanged from Previous Update) */
+.course-details {
+  padding: 30px;
+  margin: 20px 0;
+  background: linear-gradient(145deg, #f0faff, #d6eaff);
+  border: 3px solid #00C4B4;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 196, 180, 0.2);
   position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-details:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 196, 180, 0.3);
 }
 
 .course-details h2 {
   margin-top: 0;
-  color: rgb(82, 103, 167);
+  color: #1A3C5A;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid #00C4B4;
+  padding-bottom: 10px;
 }
 
 .course-details p {
-  color: #fff;
-  font-size: 1.1em;
+  color: #5267A7;
+  font-size: 16px;
   margin: 15px 0;
+  line-height: 1.6;
 }
 
 .course-details p strong {
-  color: #a3d8f4;
+  color: #1A3C5A;
 }
 
+/* Close Button (Unchanged) */
 .close-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #dc3545;
-  color: #fff;
+  top: 15px;
+  right: 15px;
+  background-color: #F44336;
+  color: #FFFFFF;
   border: none;
   border-radius: 50%;
   width: 30px;
   height: 30px;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .close-button:hover {
-  background-color: #c82333;
+  background-color: #D32F2F;
+  transform: rotate(90deg);
 }
 
-/* Actions Section */
+/* Actions Section (Adapted from instructor-home, styled like User Page) */
 .actions-card {
-  background-color: rgba(13, 73, 137, 0.95);
-  border: 2px solid #4ecdc4;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   padding: 20px;
-  margin: 20px;
+  background: linear-gradient(135deg, #FFFFFF, #E1F5FE);
+  border: 2px solid #00C4B4;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 h3 {
-  color: rgb(82, 103, 167);
-  font-size: 24px;
+  color: #1A3C5A;
+  font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
-  background: linear-gradient(45deg, #1e90ff, #00b7eb);
-  padding: 10px;
-  border-radius: 5px;
 }
 
 .button-group {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 15px;
+  gap: 15px; /* Reverted to original gap */
 }
 
+/* Action Button (Reverted to original smaller style with inline icons) */
 .action-button {
-  padding: 12px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  padding: 12px 25px; /* Original padding */
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 8px; /* Original border-radius */
+  font-size: 16px; /* Original font size */
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 180px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 180px; /* Original min-width */
+  color: #FFFFFF;
 }
 
+/* Icon styling */
+.button-icon {
+  width: 24px; /* Size of the icon */
+  height: 24px;
+  object-fit: contain;
+}
+
+/* Button-specific styles (Reverted to original gradients) */
 .create {
-  background: linear-gradient(45deg, #28a745, #34c759);
+  background: linear-gradient(45deg, #4CAF50, #66BB6A);
 }
 
 .create:hover {
-  background: linear-gradient(45deg, #218838, #2ba84a);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
 }
 
 .view {
-  background: linear-gradient(45deg, #1e90ff, #00b7eb);
+  background: linear-gradient(45deg, #2196F3, #42A5F5);
 }
 
 .view:hover {
-  background: linear-gradient(45deg, #1e7bff, #00a3d9);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 183, 235, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
 }
 
 .create-assessment {
-  background: linear-gradient(45deg, #17a2b8, #1ac6d9);
+  background: linear-gradient(45deg, #9C27B0, #AB47BC);
 }
 
 .create-assessment:hover {
-  background: linear-gradient(45deg, #138496, #16b0c2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(156, 39, 176, 0.4);
 }
 
 .view-assessments {
-  background: linear-gradient(45deg, #ff9800, #ffac33);
+  background: linear-gradient(45deg, #FF9800, #FFB300);
 }
 
 .view-assessments:hover {
-  background: linear-gradient(45deg, #e68900, #ff9a1a);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
 }
 
-.logout {
-  background: linear-gradient(45deg, #dc3545, #ff4d4d);
+/* Profile and Logout Buttons (Same as User Page) */
+.logout-button {
+  background: linear-gradient(45deg, #008080, #00A8A1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.logout:hover {
-  background: linear-gradient(45deg, #c82333, #e63946);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+.profile-button {
+  background: linear-gradient(45deg, #00A8A1, #00C4B4);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.logout-button:hover,
+.profile-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 196, 180, 0.7);
+}
+
+/* Error Message (Adapted from instructor-home) */
 .error-message {
-  color: #dc3545;
+  color: #D32F2F;
   text-align: center;
   font-size: 16px;
-  padding: 10px;
-  background-color: rgba(220, 53, 69, 0.1);
-  border-radius: 5px;
+  padding: 15px;
+  background-color: #FFCDD2;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.1);
 }
 
+/* No Courses Message (Same as User Page) */
 .no-courses {
   text-align: center;
   color: #a3d8f4;
   font-size: 18px;
-  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
 }
 
-/* Responsive Design */
+/* Animations (Same as User Page) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1.5s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.6s ease-out forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-fade-in {
+  animation: modalFadeIn 0.5s ease-out forwards;
+}
+
+/* Responsive adjustments (Updated for smaller buttons) */
 @media (max-width: 768px) {
-  .instructor-home-container {
-    padding: 0;
+  .instructor-page-container {
+    padding: 20px 15px;
   }
 
-  .instructor-home-container.full-screen {
-    padding: 15px;
-  }
-
-  h2 {
-    font-size: 24px;
-  }
-
-  h3 {
-    font-size: 20px;
+  .course-list {
+    flex-direction: column;
+    align-items: center;
   }
 
   .course-card {
     width: 100%;
+    max-width: 350px;
   }
 
   .button-group {
     flex-direction: column;
     align-items: center;
+    gap: 10px; /* Adjusted gap for mobile */
   }
 
   .action-button {
+    padding: 10px 20px; /* Slightly smaller padding on mobile */
+    min-width: 150px; /* Adjusted min-width for mobile */
+    font-size: 14px; /* Slightly smaller font size on mobile */
+  }
+
+  .button-icon {
+    width: 20px; /* Smaller icon on mobile */
+    height: 20px;
+  }
+
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-date {
+    margin-top: 5px;
+  }
+
+  .mark-read {
+    margin-top: 10px;
+  }
+
+  .nav-bar {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-buttons {
+    flex-direction: column;
+    gap: 10px;
     width: 100%;
-    max-width: 250px;
+    align-items: center;
+  }
+
+  .nav-buttons .profile-button,
+  .nav-buttons .logout-button {
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
   }
 }

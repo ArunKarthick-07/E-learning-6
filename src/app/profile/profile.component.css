@@ -1,91 +1,318 @@
+/* Full-screen container with a more dynamic gradient and subtle animation */
 .profile-container {
-  max-width: 600px;
-  margin: 20px auto;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #6B48FF 0%, #00DDEB 50%, #FF6F61 100%); /* Purple to Cyan to Coral */
+  background-size: 200% 200%; /* For gradient animation */
+  animation: gradientShift 15s ease infinite; /* Smooth gradient animation */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  position: relative;
 }
 
+/* Gradient animation keyframes */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Profile details container with glassmorphism effect */
 .profile-details {
+  background: rgba(42, 46, 91, 0.7); /* Semi-transparent deep indigo */
+  backdrop-filter: blur(10px); /* Glassmorphism blur effect */
+  border: 2px solid rgba(0, 255, 221, 0.5); /* Softer cyan border with transparency */
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
   text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); /* Deeper shadow for depth */
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Hover effect for profile details container */
+.profile-details:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Heading with improved gradient and text shadow */
+h1 {
+  color: #FFD700; /* Gold for headings */
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 25px;
+  background: linear-gradient(45deg, #FF4081, #FFEB3B, #00DDEB); /* Pink to Yellow to Cyan */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; /* Gradient text effect */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3); /* Subtle text shadow */
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Profile photo section with a glowing ring effect */
 .profile-photo {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  position: relative;
 }
 
 .photo-preview {
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
+  border: 4px solid transparent;
+  background: linear-gradient(45deg, #00FFDD, #FF6F61) border-box; /* Gradient border */
+  box-shadow: 0 0 20px rgba(0, 255, 221, 0.5); /* Soft cyan glow */
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
+.photo-preview:hover {
+  transform: scale(1.1) rotate(5deg); /* Slight rotation on hover */
+  box-shadow: 0 0 30px rgba(0, 255, 221, 0.8); /* Stronger glow */
+}
+
+/* Details view with improved typography and spacing */
 .details-view p {
-  margin: 10px 0;
-  font-size: 16px;
+  margin: 15px 0;
+  font-size: 18px;
+  color: #F5F5F5; /* Soft white */
+  line-height: 1.6; /* Better readability */
+  font-family: 'Inter', sans-serif; /* Modern font */
 }
 
+.details-view p strong {
+  color: #FFEB3B; /* Yellow for emphasis */
+  font-weight: 600;
+}
+
+/* Form group with better spacing and alignment */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   text-align: left;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: bold;
+  color: #FFD700; /* Gold for labels */
+  font-size: 16px;
 }
 
+/* Inputs with a modern look and subtle glow */
 input[type="text"],
 input[type="email"],
 input[type="number"],
 input[type="password"] {
   width: 100%;
-  padding: 8px;
+  padding: 12px;
   margin: 5px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   box-sizing: border-box;
+  background: rgba(245, 245, 245, 0.9); /* Slightly transparent soft white */
+  color: #2A2E5B; /* Deep indigo text */
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle inset shadow */
+  transition: all 0.3s ease;
 }
 
-.button-group {
-  margin-top: 20px;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border: 1px solid #FFEB3B; /* Yellow border on focus */
+  background: #FFFFFF; /* Pure white on focus */
+  box-shadow: 0 0 12px rgba(255, 235, 59, 0.7); /* Stronger yellow glow */
 }
 
-button {
-  padding: 10px 20px;
-  margin-right: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+/* File input with better styling */
+input[type="file"] {
+  margin-top: 10px;
+  color: #F5F5F5;
+  font-size: 14px;
+  padding: 8px;
+  background: rgba(0, 255, 221, 0.1); /* Light cyan background */
+  border-radius: 5px;
   cursor: pointer;
 }
 
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+/* Button group with better spacing */
+.button-group {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
-button:hover:not(:disabled) {
-  background-color: #0056b3;
+/* General button styles with improved visuals */
+.action-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-width: 130px;
 }
 
+/* Button hover effect with a shine animation */
+.action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: 0.5s;
+}
+
+.action-button:hover::before {
+  left: 100%;
+}
+
+/* Edit button */
 .edit-button {
-  background-color: #28a745;
+  background: linear-gradient(45deg, #4CAF50, #8BC34A); /* Green to Lime */
 }
 
 .edit-button:hover {
-  background-color: #218838;
+  background: linear-gradient(45deg, #388E3C, #689F38);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.6);
 }
 
+/* Save button */
+.save {
+  background: linear-gradient(45deg, #2196F3, #00BCD4); /* Blue to Cyan */
+}
+
+.save:hover:not(:disabled) {
+  background: linear-gradient(45deg, #1976D2, #0097A7);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(33, 150, 243, 0.6);
+}
+
+/* Cancel button */
+.cancel {
+  background: linear-gradient(45deg, #F44336, #D32F2F); /* Red to Dark Red */
+}
+
+.cancel:hover {
+  background: linear-gradient(45deg, #D32F2F, #B71C1C);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(244, 67, 54, 0.6);
+}
+
+/* Disabled button */
+.action-button:disabled {
+  background: linear-gradient(45deg, #666, #999);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Messages with better contrast and padding */
 .error-message {
-  color: red;
-  margin-bottom: 10px;
+  color: #FF6F61; /* Coral for error messages */
+  margin-bottom: 15px;
+  font-size: 16px;
+  background: rgba(255, 111, 97, 0.2); /* Slightly darker background */
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 111, 97, 0.5);
 }
 
 .success-message {
-  color: green;
-  margin-bottom: 10px;
+  color: #4CAF50; /* Green for success messages */
+  margin-bottom: 15px;
+  font-size: 16px;
+  background: rgba(76, 175, 80, 0.2); /* Slightly darker background */
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+/* Responsive Design with better adjustments */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 15px;
+    background-size: 300% 300%; /* Adjusted for smaller screens */
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  .profile-details {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .photo-preview {
+    width: 130px;
+    height: 130px;
+  }
+
+  .details-view p {
+    font-size: 16px;
+  }
+
+  .form-group input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .action-button {
+    font-size: 14px;
+    padding: 10px 20px;
+    min-width: 110px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+  }
+
+  .profile-details {
+    padding: 15px;
+  }
+
+  .photo-preview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .details-view p {
+    font-size: 14px;
+  }
+
+  .action-button {
+    font-size: 13px;
+    padding: 8px 15px;
+    min-width: 100px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
